@@ -149,7 +149,7 @@ function include_template($name, array $data = [])
  * @param integer $num Price of lot
  * @return string Formatted price of lot
  */
-function format_num($num)
+function format_num($num): string
 {
   $num = ceil($num);
 
@@ -171,4 +171,42 @@ function format_num($num)
   }
 
   return $num . ' ' . '₽';
+}
+
+/**
+ * @param string $date_string
+ * @return array
+ */
+function get_time_left($date_string): array
+{
+  date_default_timezone_set('Europe/Kyiv');
+
+  // 1 - By Unixtime
+  // $cur_date = time();
+  // $end_date = strtotime($date_string);
+
+  // 2 - date_*
+  $cur_date = date_create();
+  $end_date = date_create($date_string);
+
+  if ($cur_date >= $end_date) {
+    return [0, 0];
+  }
+
+  // 1 - By Unixtime
+  // $diff = $end_date - $cur_date;
+
+  // $rest_of_hours = floor($diff / (60 * 60));
+  // $rest_of_minutes = floor($diff / 60) - $rest_of_hours * 60;
+
+  // 2 - date_*
+  $diff = date_diff($cur_date, $end_date);
+
+  $rest_of_hours = $diff->h + $diff->d * 24;
+  $rest_of_minutes = $diff->i;
+
+  return [
+    $rest_of_hours,
+    $rest_of_minutes,
+  ];
 }
