@@ -22,7 +22,7 @@ $lots = [
   [
     'title' => 'DC Ply Mens 2016/2017 Snowboard',
     'category' => $categories['boards'],
-    'price' => 159999,
+    'price' => 118959499,
     'image' => 'img/lot-2.jpg',
   ],
   [
@@ -50,6 +50,34 @@ $lots = [
     'image' => 'img/lot-6.jpg',
   ],
 ];
+
+/**
+ * @param integer $num Price of lot
+ * @return string Formatted price of lot
+ */
+function format_num($num)
+{
+  $num = ceil($num);
+
+  if ($num >= 1000) {
+    // 1
+    // $num = number_format($num, 0, '', ' ');
+
+    //2
+    $array_num = [];
+    $first_num = '' . $num;
+
+    do {
+      array_unshift($array_num, substr($first_num, -3));
+
+      $first_num = substr($first_num, 0, -3);
+    } while (strlen($first_num) > 3);
+
+    $num = $first_num . ' ' . join(' ', $array_num);
+  }
+
+  return $num . ' ' . '₽';
+}
 ?>
 <!DOCTYPE html>
 <html lang="ru">
@@ -125,7 +153,7 @@ $lots = [
                 <div class="lot__state">
                   <div class="lot__rate">
                     <span class="lot__amount">Стартовая цена</span>
-                    <span class="lot__cost"><?= $lot['price']; ?><b class="rub">р</b></span>
+                    <span class="lot__cost"><?= format_num($lot['price']); ?></span>
                   </div>
                   <div class="lot__timer timer">
                     12:23
