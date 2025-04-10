@@ -13,3 +13,7 @@ uploads/*
 
 # exception to the rule
 !uploads/.gitkeep
+
+db.php
+
+.osp/*
