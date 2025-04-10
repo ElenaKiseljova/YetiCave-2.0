@@ -19,7 +19,7 @@ function is_date_valid(string $date): bool
   $format_to_check = 'Y-m-d';
   $dateTimeObj = date_create_from_format($format_to_check, $date);
 
-  return $dateTimeObj !== false && array_sum(date_get_last_errors()) === 0;
+  return $dateTimeObj !== false && ($errs = date_get_last_errors()) ? array_sum($errs) === 0 : true;
 }
 
 /**
@@ -40,7 +40,7 @@ function db_get_prepare_stmt($link, $sql, $data = [])
     die($errorMsg);
   }
 
-  if ($data) {
+  if ($data && is_array($data)) {
     $types = '';
     $stmt_data = [];
 
@@ -174,11 +174,19 @@ function format_num($num): string
 }
 
 /**
- * @param string $date_string
+ * @param string $date_string YYYY-MM-DD
  * @return array
  */
 function get_time_left($date_string): array
 {
+  // Get date string in YYYY-MM-DD format
+  $date_string = explode(' ', $date_string)[0];
+
+  // Check date format
+  if (!is_date_valid($date_string)) {
+    return [0, 0];
+  }
+
   date_default_timezone_set('Europe/Kyiv');
 
   // 1 - By Unixtime
