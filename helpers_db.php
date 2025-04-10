@@ -54,11 +54,37 @@ function db_get_prepare_stmt($link, $sql, $data = [])
 }
 
 /**
- * @param callable(\mysqli $con): bool|null $callback
- * @param ?bool $reset_before
- * @return void
+ * @param \mysqli $con
+ * @return mysqli|false
  */
-function db_connect($callback, $reset_before = null): void
+function db_select($con)
+{
+  require 'db.php';
+
+  try {
+    // Set charset
+    mysqli_set_charset($con, $db['charset']);
+
+    mysqli_select_db($con, $db['name']);
+  } catch (\Throwable $th) {
+    // DB error connect
+    if (mysqli_errno($con)) {
+      $error_message = mysqli_error($con);
+
+      print('An attempt to select the database «' . $db['name'] . '» failed: ' . $error_message);
+
+      die();
+    } else {
+      throw $th;
+    }
+  }
+}
+
+/**
+ * @param bool $select_db_manualy
+ * @return mysqli|false
+ */
+function db_connect($select_db_manualy = false)
 {
   require 'db.php';
 
@@ -67,43 +93,11 @@ function db_connect($callback, $reset_before = null): void
     $con = mysqli_connect($db['host'], $db['user'], $db['password']);
 
     // DB success connect
-    try {
-      // Delete the old database before using it
-      if ($reset_before) {
-        db_drop($con, $db['name']);
-      }
-
-      mysqli_select_db($con, $db['name']);
-
-      // Set charset
-      mysqli_set_charset($con, $db['charset']);
-
-      // Check callback function
-      if (is_callable($callback)) {
-        $callback($con);
-      } else {
-        // There is no callback function
-      }
-    } catch (\Throwable $th) {
-      // DB error connect
-      if (mysqli_errno($con)) {
-        // Create DB
-        $result = db_create($con, $db['name']);
-
-        if (!$result) {
-          $error_message = mysqli_error($con);
-
-          print('An attempt to select the database «' . $db['name'] . '» failed: ' . $error_message);
-
-          die();
-        } else {
-          // Try to connect again
-          db_connect($callback);
-        }
-      } else {
-        throw $th;
-      }
+    if (!$select_db_manualy) {
+      db_select($con);
     }
+
+    return $con;
   } catch (\Throwable $th) {
     // DB error connect
     if (mysqli_connect_errno()) {
