@@ -129,10 +129,10 @@ function format_num($num): string
 function get_time_left($date_string): array
 {
   // Get date string in YYYY-MM-DD format
-  $date_string = explode(' ', $date_string)[0];
+  $date_string_formatted = explode(' ', $date_string)[0];
 
   // Check date format
-  if (!is_date_valid($date_string)) {
+  if (!is_date_valid($date_string_formatted)) {
     return [0, 0];
   }
 
