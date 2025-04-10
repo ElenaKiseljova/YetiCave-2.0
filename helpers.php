@@ -1,4 +1,6 @@
 <?php
+require_once 'helpers_db.php';
+require_once 'helpers_queries.php';
 
 /**
  * Проверяет переданную дату на соответствие формату 'ГГГГ-ММ-ДД'
@@ -20,59 +22,6 @@ function is_date_valid(string $date): bool
   $dateTimeObj = date_create_from_format($format_to_check, $date);
 
   return $dateTimeObj !== false && ($errs = date_get_last_errors()) ? array_sum($errs) === 0 : true;
-}
-
-/**
- * Создает подготовленное выражение на основе готового SQL запроса и переданных данных
- *
- * @param $link mysqli Ресурс соединения
- * @param $sql string SQL запрос с плейсхолдерами вместо значений
- * @param array $data Данные для вставки на место плейсхолдеров
- *
- * @return mysqli_stmt Подготовленное выражение
- */
-function db_get_prepare_stmt($link, $sql, $data = [])
-{
-  $stmt = mysqli_prepare($link, $sql);
-
-  if ($stmt === false) {
-    $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
-    die($errorMsg);
-  }
-
-  if ($data && is_array($data)) {
-    $types = '';
-    $stmt_data = [];
-
-    foreach ($data as $value) {
-      $type = 's';
-
-      if (is_int($value)) {
-        $type = 'i';
-      } else if (is_string($value)) {
-        $type = 's';
-      } else if (is_double($value)) {
-        $type = 'd';
-      }
-
-      if ($type) {
-        $types .= $type;
-        $stmt_data[] = $value;
-      }
-    }
-
-    $values = array_merge([$stmt, $types], $stmt_data);
-
-    $func = 'mysqli_stmt_bind_param';
-    $func(...$values);
-
-    if (mysqli_errno($link) > 0) {
-      $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
-      die($errorMsg);
-    }
-  }
-
-  return $stmt;
 }
 
 /**
