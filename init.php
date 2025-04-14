@@ -1,30 +1,32 @@
 <?php
 // Source: schema.sql
 
-require_once 'helpers.php';
-require 'db.php';
+require_once 'env/db.php';
+require_once 'controllers/DBController.php';
 
 // Connect to the database with manualy select DB
-$con = db_connect(true);
+$db = new DBController();
+
+$con = $db->connect(true);
 
 // Delete the old database before using it
-db_drop($con, $db['name']);
+$db->drop($con, $dbParameters['name']);
 
 // Create DB
-$result = db_create($con, $db['name']);
+$result = $db->create($con, $dbParameters['name']);
 
 if ($result) {
   // Select DB
-  db_select($con);
+  $db->select($con);
 }
 
 // Create Tabels
 
 // Errors
-$create_table_errors = [];
+$createTableErrors = [];
 
 // Create Users table
-['error' => $create_table_errors['users']] = db_create_table(
+['error' => $createTableErrors['users']] = $db->createTable(
   $con,
   "CREATE TABLE users ( " .
     "id INT AUTO_INCREMENT PRIMARY KEY, " .
@@ -37,7 +39,7 @@ $create_table_errors = [];
 );
 
 // Create Categories table
-['error' => $create_table_errors['categories']] = db_create_table(
+['error' => $createTableErrors['categories']] = $db->createTable(
   $con,
   "CREATE TABLE categories ( " .
     "id INT AUTO_INCREMENT PRIMARY KEY, " .
@@ -48,7 +50,7 @@ $create_table_errors = [];
 );
 
 // Create Lots table
-['error' => $create_table_errors['lots']] = db_create_table(
+['error' => $createTableErrors['lots']] = $db->createTable(
   $con,
   "CREATE TABLE lots ( " .
     "id INT AUTO_INCREMENT PRIMARY KEY, " .
@@ -70,7 +72,7 @@ $create_table_errors = [];
 );
 
 // Create Bets table
-['error' => $create_table_errors['bets']] = db_create_table(
+['error' => $createTableErrors['bets']] = $db->createTable(
   $con,
   "CREATE TABLE bets ( " .
     "id INT AUTO_INCREMENT PRIMARY KEY, " .
@@ -84,9 +86,9 @@ $create_table_errors = [];
 );
 
 echo '<h2>Create</h2>';
-echo '<p style="color: green;">Database «' . $db['name'] . '» was successfully created!</p>';
+echo '<p style="color: green;">Database «' . $dbParameters['name'] . '» was successfully created!</p>';
 
-foreach ($create_table_errors as $key => $create_table_error) {
+foreach ($createTableErrors as $key => $create_table_error) {
   if (is_array($create_table_error) && isset($create_table_error['message'])) {
     echo '<p style="color: red;">Database Table «' . $key . '» was not created due to an error: ' . $create_table_error['message'] . '</p>';
   } else {

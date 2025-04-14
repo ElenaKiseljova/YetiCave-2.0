@@ -1,5 +1,6 @@
 <?php
 require_once 'helpers.php';
+require_once 'controllers/DBController.php';
 
 // List of Lots (default)
 $lots = [];
@@ -8,7 +9,9 @@ $lots = [];
 $categories = [];
 
 // Connect to the database
-$con = db_connect();
+$db = new DBController();
+
+$con = $db->connect();
 
 // Get list of Lots
 ['data' => $data_lots, 'error' => $error] = get_lots($con);

@@ -1,12 +1,15 @@
 <?php
 // Source: queries.sql
 
-require_once 'helpers.php';
+require_once 'controllers/DBController.php';
+
 // when installed via composer
 require 'vendor/autoload.php';
 
 // Connect with database
-$con = db_connect();
+$db = new DBController();
+
+$con = $db->connect();
 
 // use the factory to create a Faker\Generator instance
 $faker = Faker\Factory::create();

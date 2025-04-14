@@ -1,5 +1,4 @@
 <?php
-require_once 'helpers_db.php';
 require_once 'helpers_queries.php';
 
 /**
