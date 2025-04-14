@@ -28,9 +28,10 @@
             $price = isset($priceCurrent) ? $priceCurrent : $lot['price_start'];
 
             $title = $priceCurrent ? "Текущая цена" : "Стартовая цена";
+            $titleColor = $priceCurrent ? "orange" : "green";
             ?>
             <div class="lot__rate">
-              <span class="lot__amount"><?= $title; ?></span>
+              <span class="lot__amount" style="color: <?= $titleColor; ?>"><?= $title; ?></span>
               <span class="lot__cost"><?= formatNum(htmlspecialchars($price)); ?></span>
             </div>
 
