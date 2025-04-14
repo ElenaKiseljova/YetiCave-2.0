@@ -93,6 +93,7 @@ function includeTemplate($name, array $data = [])
 }
 
 /**
+ * Возвращает форматированную цену в рублях
  * @param integer $num Price of lot
  * @return string Formatted price of lot
  */
@@ -121,6 +122,7 @@ function formatNum($num): string
 }
 
 /**
+ * Возвращает в виде массива оставшиеся часы и минуты до закрытия лота
  * @param string $dateString YYYY-MM-DD
  * @return array
  */
@@ -164,4 +166,84 @@ function getTimeLeft($dateString): array
     $restOfHours,
     $restOfMinutes,
   ];
+}
+
+/**
+ * Возвращает ссылку с сохраненными квери-параметрами
+ * @param string $filePath
+ * @param array $newParameters
+ * @param 'file'|'base' $pathName
+ * @return string
+ */
+function getUrlWithQuery($filePath, $newParameters = [], $pathName = 'file')
+{
+  // Summary array of parameters
+  $params = [
+    ...$_GET,
+    ...$newParameters
+  ];
+
+  // Flag
+  $pathName = $pathName === 'file' ? PATHINFO_FILENAME : PATHINFO_BASENAME;
+
+  // Base URL
+  $scriptname = pathinfo($filePath, $pathName);
+
+  // Query string
+  $query = http_build_query($params);
+
+  // Base URL with Query
+  $url = "/" . ($scriptname === 'index' ? '' : $scriptname) . "?" . $query;
+
+  return $url;
+}
+
+/**
+ * Возвращает значение, переданное методом POST
+ * @param string $name
+ * @return string
+ */
+function getPostVal($name)
+{
+  return $_POST[$name] ?? "";
+}
+
+/**
+ * Проверка на email
+ * @param string $name
+ * @return string|null
+ */
+function validateEmail($name)
+{
+  if (!filter_input(INPUT_POST, $name, FILTER_VALIDATE_EMAIL)) {
+    return "Введите корректный email";
+  };
+}
+
+/**
+ * Проверка заполненности
+ * @param string $name
+ * @return string|null
+ */
+function validateFilled($name)
+{
+  if (empty($_POST[$name])) {
+    return "Это поле должно быть заполнено";
+  }
+}
+
+/**
+ * Проверка длины
+ * @param string $name
+ * @param int $min
+ * @param int $max
+ * @return string|null
+ */
+function isCorrectLength($name, $min, $max)
+{
+  $len = strlen($_POST[$name]);
+
+  if ($len < $min or $len > $max) {
+    return "Значение должно быть от $min до $max символов";
+  }
 }
