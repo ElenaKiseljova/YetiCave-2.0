@@ -1,4 +1,6 @@
 <?php
+require_once 'controllers/DBController.php';
+
 class LotController
 {
   /**
@@ -18,7 +20,7 @@ class LotController
 
     try {
       // Create SQL query string
-      $sql_lots =
+      $sqlLots =
         "SELECT " .
         "l.id, " .
         "l.title, " .
@@ -42,10 +44,14 @@ class LotController
         "l.id " .
         "ORDER BY " .
         "l.created_at DESC " .
-        "LIMIT $limit";
+        "LIMIT ?";
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlLots, [$limit]);
+
+      mysqli_stmt_execute($stmt);
 
       // Create query for geting list of Lots
-      $result = mysqli_query($con, $sql_lots);
+      $result = mysqli_stmt_get_result($stmt);
 
       // Request success
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -54,12 +60,12 @@ class LotController
       $response['success'] = true;
     } catch (\Throwable $th) {
       // Request error
-      if ($error_code = mysqli_errno($con)) {
-        $error_message = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
 
         $response['error'] = [
-          'code' => $error_code,
-          'message' => $error_message
+          'code' => $errorCode,
+          'message' => $errorMessage
         ];
       }
     }
