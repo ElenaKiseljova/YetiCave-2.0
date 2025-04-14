@@ -41,8 +41,10 @@ if (is_array($dataCategories)) {
   die();
 }
 
-$pageContent = includeTemplate('main.php', ['categories' => $categories,  'lots' => $lots]);
+$nav = includeTemplate('components/nav.php', ['categories' => $categories]);
 
-$layoutContent = includeTemplate('layout.php', ['title' => 'Главная', 'content' => $pageContent, 'categories' => $categories,]);
+$pageContent = includeTemplate('pages/index.php', ['categories' => $categories,  'lots' => $lots]);
+
+$layoutContent = includeTemplate('layout.php', ['title' => 'Главная', 'content' => $pageContent, 'nav' => $nav,]);
 
 print($layoutContent);
