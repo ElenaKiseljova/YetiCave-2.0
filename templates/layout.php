@@ -20,7 +20,7 @@ $userName = 'Елена К.'; // укажите здесь ваше имя
     <header class="main-header">
       <div class="main-header__container container">
         <h1 class="visually-hidden">YetiCave</h1>
-        <a class="main-header__logo">
+        <a href="/" class="main-header__logo">
           <img src="../img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
         </a>
         <form class="main-header__search" method="get" action="https://echo.htmlacademy.ru" autocomplete="off">
@@ -56,15 +56,7 @@ $userName = 'Елена К.'; // укажите здесь ваше имя
   </div>
 
   <footer class="main-footer">
-    <nav class="nav">
-      <ul class="nav__list container">
-        <?php foreach ($categories as $key => $category): ?>
-          <li class="nav__item">
-            <a href="pages/all-lots.html"><?= $category['title']; ?></a>
-          </li>
-        <?php endforeach; ?>
-      </ul>
-    </nav>
+    <?= isset($nav) ? $nav : ''; ?>
     <div class="main-footer__bottom container">
       <div class="main-footer__copyright">
         <p>© 2019, YetiCave</p>
