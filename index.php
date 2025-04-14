@@ -1,6 +1,8 @@
 <?php
 require_once 'helpers.php';
 require_once 'controllers/DBController.php';
+require_once 'controllers/LotController.php';
+require_once 'controllers/CategoryController.php';
 
 // List of Lots (default)
 $lots = [];
@@ -14,7 +16,9 @@ $db = new DBController();
 $con = $db->connect();
 
 // Get list of Lots
-['data' => $data_lots, 'error' => $error] = get_lots($con);
+$lot = new LotController();
+
+['data' => $data_lots, 'error' => $error] = $lot->getList($con);
 
 if (is_array($data_lots)) {
   $lots = $data_lots;
@@ -25,7 +29,9 @@ if (is_array($data_lots)) {
 }
 
 // Get list of Categories
-['data' => $data_categories, 'error' => $error] = get_categories($con);
+$category = new CategoryController();
+
+['data' => $data_categories, 'error' => $error] = $category->getList($con);
 
 if (is_array($data_categories)) {
   $categories = $data_categories;
