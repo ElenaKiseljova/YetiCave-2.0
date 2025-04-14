@@ -88,9 +88,9 @@ $createTableErrors = [];
 echo '<h2>Create</h2>';
 echo '<p style="color: green;">Database «' . $dbParameters['name'] . '» was successfully created!</p>';
 
-foreach ($createTableErrors as $key => $create_table_error) {
-  if (is_array($create_table_error) && isset($create_table_error['message'])) {
-    echo '<p style="color: red;">Database Table «' . $key . '» was not created due to an error: ' . $create_table_error['message'] . '</p>';
+foreach ($createTableErrors as $key => $createTableError) {
+  if (is_array($createTableError) && isset($createTableError['message'])) {
+    echo '<p style="color: red;">Database Table «' . $key . '» was not created due to an error: ' . $createTableError['message'] . '</p>';
   } else {
     echo '<p style="color: green;">Database Table «' . $key . '» was successfully created!</p>';
   }

@@ -15,10 +15,10 @@ class CategoryController
 
     try {
       // Create SQL query string
-      $sql_categories = "SELECT * FROM categories";
+      $sqlCategories = "SELECT * FROM categories";
 
       // Create query for geting list of Lots
-      $result = mysqli_query($con, $sql_categories);
+      $result = mysqli_query($con, $sqlCategories);
 
       // Request success
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -27,12 +27,12 @@ class CategoryController
       $response['success'] = true;
     } catch (\Throwable $th) {
       // Request error
-      if ($error_code = mysqli_errno($con)) {
-        $error_message = 'Getting list of Categories failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of Categories failed due to an error: ' . mysqli_error($con);
 
         $response['error'] = [
-          'code' => $error_code,
-          'message' => $error_message
+          'code' => $errorCode,
+          'message' => $errorMessage
         ];
       }
     }

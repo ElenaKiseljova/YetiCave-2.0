@@ -4,20 +4,20 @@
  * Проверяет переданную дату на соответствие формату 'ГГГГ-ММ-ДД'
  *
  * Примеры использования:
- * is_date_valid('2019-01-01'); // true
- * is_date_valid('2016-02-29'); // true
- * is_date_valid('2019-04-31'); // false
- * is_date_valid('10.10.2010'); // false
- * is_date_valid('10/10/2010'); // false
+ * isDateValid('2019-01-01'); // true
+ * isDateValid('2016-02-29'); // true
+ * isDateValid('2019-04-31'); // false
+ * isDateValid('10.10.2010'); // false
+ * isDateValid('10/10/2010'); // false
  *
  * @param string $date Дата в виде строки
  *
  * @return bool true при совпадении с форматом 'ГГГГ-ММ-ДД', иначе false
  */
-function is_date_valid(string $date): bool
+function isDateValid(string $date): bool
 {
-  $format_to_check = 'Y-m-d';
-  $dateTimeObj = date_create_from_format($format_to_check, $date);
+  $formatToCheck = 'Y-m-d';
+  $dateTimeObj = date_create_from_format($formatToCheck, $date);
 
   return $dateTimeObj !== false && ($errs = date_get_last_errors()) ? array_sum($errs) === 0 : true;
 }
@@ -27,10 +27,10 @@ function is_date_valid(string $date): bool
  * Ограничения: только для целых чисел
  *
  * Пример использования:
- * $remaining_minutes = 5;
- * echo "Я поставил таймер на {$remaining_minutes} " .
- *     get_noun_plural_form(
- *         $remaining_minutes,
+ * $remainingMinutes = 5;
+ * echo "Я поставил таймер на {$remainingMinutes} " .
+ *     getNounPluralForm(
+ *         $remainingMinutes,
  *         'минута',
  *         'минуты',
  *         'минут'
@@ -44,7 +44,7 @@ function is_date_valid(string $date): bool
  *
  * @return string Рассчитанная форма множественнго числа
  */
-function get_noun_plural_form(int $number, string $one, string $two, string $many): string
+function getNounPluralForm(int $number, string $one, string $two, string $many): string
 {
   $number = (int) $number;
   $mod10 = $number % 10;
@@ -74,7 +74,7 @@ function get_noun_plural_form(int $number, string $one, string $two, string $man
  * @param array $data Ассоциативный массив с данными для шаблона
  * @return string Итоговый HTML
  */
-function include_template($name, array $data = [])
+function includeTemplate($name, array $data = [])
 {
   $name = 'templates/' . $name;
   $result = '';
@@ -96,7 +96,7 @@ function include_template($name, array $data = [])
  * @param integer $num Price of lot
  * @return string Formatted price of lot
  */
-function format_num($num): string
+function formatNum($num): string
 {
   $num = ceil($num);
 
@@ -105,63 +105,63 @@ function format_num($num): string
     // $num = number_format($num, 0, '', ' ');
 
     //2
-    $array_num = [];
-    $first_num = '' . $num;
+    $arrayNum = [];
+    $firstNum = '' . $num;
 
     do {
-      array_unshift($array_num, substr($first_num, -3));
+      array_unshift($arrayNum, substr($firstNum, -3));
 
-      $first_num = substr($first_num, 0, -3);
-    } while (strlen($first_num) > 3);
+      $firstNum = substr($firstNum, 0, -3);
+    } while (strlen($firstNum) > 3);
 
-    $num = $first_num . ' ' . join(' ', $array_num);
+    $num = $firstNum . ' ' . join(' ', $arrayNum);
   }
 
   return $num . ' ' . '₽';
 }
 
 /**
- * @param string $date_string YYYY-MM-DD
+ * @param string $dateString YYYY-MM-DD
  * @return array
  */
-function get_time_left($date_string): array
+function getTimeLeft($dateString): array
 {
   // Get date string in YYYY-MM-DD format
-  $date_string_formatted = explode(' ', $date_string)[0];
+  $dateStringFormatted = explode(' ', $dateString)[0];
 
   // Check date format
-  if (!is_date_valid($date_string_formatted)) {
+  if (!isDateValid($dateStringFormatted)) {
     return [0, 0];
   }
 
   date_default_timezone_set('Europe/Kyiv');
 
   // 1 - By Unixtime
-  // $cur_date = time();
-  // $end_date = strtotime($date_string);
+  // $curDate = time();
+  // $endDate  = strtotime($dateString);
 
   // 2 - date_*
-  $cur_date = date_create();
-  $end_date = date_create($date_string);
+  $curDate = date_create();
+  $endDate  = date_create($dateString);
 
-  if ($cur_date >= $end_date) {
+  if ($curDate >= $endDate) {
     return [0, 0];
   }
 
   // 1 - By Unixtime
-  // $diff = $end_date - $cur_date;
+  // $diff = $endDate  - $curDate;
 
-  // $rest_of_hours = floor($diff / (60 * 60));
-  // $rest_of_minutes = floor($diff / 60) - $rest_of_hours * 60;
+  // $restOfHours = floor($diff / (60 * 60));
+  // $restOfMinutes = floor($diff / 60) - $restOfHours * 60;
 
   // 2 - date_*
-  $diff = date_diff($cur_date, $end_date);
+  $diff = date_diff($curDate, $endDate);
 
-  $rest_of_hours = $diff->h + $diff->d * 24;
-  $rest_of_minutes = $diff->i;
+  $restOfHours = $diff->h + $diff->d * 24;
+  $restOfMinutes = $diff->i;
 
   return [
-    $rest_of_hours,
-    $rest_of_minutes,
+    $restOfHours,
+    $restOfMinutes,
   ];
 }

@@ -18,7 +18,7 @@ $dbParameters = [
 ];
 ```
 
-2. Запустить скрипт `init.php` для создания БД (`$db['name']`) и таблиц `users`, `categories`, `lots`, `bets`
+2. Запустить скрипт `init.php` для создания БД (`$dbParameters ['name']`) и таблиц `users`, `categories`, `lots`, `bets`
 
 3. Запустить скрипт `seeds.php` для заполнения таблиц `users`, `categories`, `lots`, `bets` фейковыми данными
 

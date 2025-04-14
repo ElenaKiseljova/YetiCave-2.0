@@ -18,10 +18,10 @@ $con = $db->connect();
 // Get list of Lots
 $lot = new LotController();
 
-['data' => $data_lots, 'error' => $error] = $lot->getList($con);
+['data' => $dataLots, 'error' => $error] = $lot->getList($con);
 
-if (is_array($data_lots)) {
-  $lots = $data_lots;
+if (is_array($dataLots)) {
+  $lots = $dataLots;
 } else if (isset($error['message'])) {
   print($error['message']);
 
@@ -31,18 +31,18 @@ if (is_array($data_lots)) {
 // Get list of Categories
 $category = new CategoryController();
 
-['data' => $data_categories, 'error' => $error] = $category->getList($con);
+['data' => $dataCategories, 'error' => $error] = $category->getList($con);
 
-if (is_array($data_categories)) {
-  $categories = $data_categories;
+if (is_array($dataCategories)) {
+  $categories = $dataCategories;
 } else if (isset($error['message'])) {
   print($error['message']);
 
   die();
 }
 
-$page_content = include_template('main.php', ['categories' => $categories,  'lots' => $lots]);
+$pageContent = includeTemplate('main.php', ['categories' => $categories,  'lots' => $lots]);
 
-$layout_content = include_template('layout.php', ['title' => 'Главная', 'content' => $page_content, 'categories' => $categories,]);
+$layoutContent = includeTemplate('layout.php', ['title' => 'Главная', 'content' => $pageContent, 'categories' => $categories,]);
 
-print($layout_content);
+print($layoutContent);

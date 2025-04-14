@@ -24,26 +24,26 @@
           <h3 class="lot__title"><a class="text-link" href="pages/lot.html"><?= htmlspecialchars($lot['title']); ?></a></h3>
           <div class="lot__state">
             <?php
-            $price_current = $lot['price_current'];
-            $price = isset($price_current) ? $price_current : $lot['price_start'];
+            $priceCurrent = $lot['price_current'];
+            $price = isset($priceCurrent) ? $priceCurrent : $lot['price_start'];
 
-            $title = $price_current ? "Текущая цена" : "Стартовая цена";
+            $title = $priceCurrent ? "Текущая цена" : "Стартовая цена";
             ?>
             <div class="lot__rate">
               <span class="lot__amount"><?= $title; ?></span>
-              <span class="lot__cost"><?= format_num(htmlspecialchars($price)); ?></span>
+              <span class="lot__cost"><?= formatNum(htmlspecialchars($price)); ?></span>
             </div>
 
             <?php
-            $time = get_time_left(htmlspecialchars($lot['expiration_date']));
+            $time = getTimeLeft(htmlspecialchars($lot['expiration_date']));
             $hours = $time[0];
             $minutes = $time[1];
 
-            $timer_classes = $hours < 1 ? 'timer--finishing' : '';
-            $timer_text = str_pad($hours, 2, '0', STR_PAD_LEFT) . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT);
+            $timerClasses = $hours < 1 ? 'timer--finishing' : '';
+            $timerText = str_pad($hours, 2, '0', STR_PAD_LEFT) . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT);
             ?>
-            <div class="lot__timer timer <?= $timer_classes ?>">
-              <?= $timer_text; ?>
+            <div class="lot__timer timer <?= $timerClasses ?>">
+              <?= $timerText; ?>
             </div>
           </div>
         </div>

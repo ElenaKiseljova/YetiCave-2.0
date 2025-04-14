@@ -46,7 +46,7 @@ try {
 // Users
 try {
   // Users Values Array
-  $sql_values_users = [];
+  $sqlValuesUsers = [];
   foreach (range(1, $USERS_COUNT) as $key) {
     $cols = [
       'name' => addslashes($faker->name()),
@@ -61,18 +61,18 @@ try {
       }
     }
 
-    $sql_values_users[] = "(" . implode(', ', $cols)  . ")";
+    $sqlValuesUsers[] = "(" . implode(', ', $cols)  . ")";
   }
 
   // Users Values to String
-  $sql_values_users = implode(', ', $sql_values_users);
+  $sqlValuesUsers = implode(', ', $sqlValuesUsers);
 
   mysqli_query(
     $con,
     "INSERT INTO " .
       "users (name, email, password, contacts) " .
       "VALUES " .
-      "$sql_values_users"
+      "$sqlValuesUsers"
   );
 
   $logs['users']['success'] = true;
@@ -80,15 +80,15 @@ try {
   // Lots
   try {
     // Lots Values Array
-    $sql_values_lots = [];
+    $sqlValuesLots = [];
 
     // Bets Values Array
-    $sql_values_bets = [];
+    $sqlValuesBets = [];
 
-    foreach (range(1, $LOTS_COUNT) as $lot_id) {
-      $user_id = mt_rand(1, $USERS_COUNT);
-      $winner_id = mt_rand(0, 1) ? $faker->numberBetween(2, $USERS_COUNT) : "NULL";
-      $winner_id = $winner_id === $user_id ? $winner_id - 1 : $winner_id;
+    foreach (range(1, $LOTS_COUNT) as $lotId) {
+      $userId = mt_rand(1, $USERS_COUNT);
+      $winnerId = mt_rand(0, 1) ? $faker->numberBetween(2, $USERS_COUNT) : "NULL";
+      $winnerId = $winnerId === $userId ? $winnerId - 1 : $winnerId;
 
       $cols = [
         'slug' => $faker->slug(2),
@@ -99,26 +99,26 @@ try {
         'price_step' => mt_rand(100, 1000),
         'expiration_date' => $faker->dateTimeBetween('-10 days', '+10 days')->format('Y-m-d H:i:s'),
         'category_id' => mt_rand(1, 6),
-        'user_id' => $user_id,
-        'winner_id' => $winner_id,
+        'user_id' => $userId,
+        'winner_id' => $winnerId,
       ];
 
       // Bets seed
       $price = $cols['price_start'];
 
-      if ($lot_id % 3) {
+      if ($lotId % 3) {
         foreach (range(1, $BETS_COUNT) as $key) {
           $price = $cols['price_start'] + mt_rand(1, 10) * $cols['price_step'];
-          $bet_user_id = 0;
+          $betUserId = 0;
 
-          if ($key === $BETS_COUNT && is_int($winner_id)) {
-            $bet_user_id = $winner_id;
+          if ($key === $BETS_COUNT && is_int($winnerId)) {
+            $betUserId = $winnerId;
           } else {
-            $bet_user_id = $faker->numberBetween(3, $USERS_COUNT);
-            $bet_user_id = $winner_id === $bet_user_id ? $bet_user_id - 1 : $bet_user_id;
+            $betUserId = $faker->numberBetween(3, $USERS_COUNT);
+            $betUserId = $winnerId === $betUserId ? $betUserId - 1 : $betUserId;
           }
 
-          $sql_values_bets[] = "(" . implode(', ', [$price, $bet_user_id, $lot_id])  . ")";
+          $sqlValuesBets[] = "(" . implode(', ', [$price, $betUserId, $lotId])  . ")";
         }
       }
 
@@ -128,11 +128,11 @@ try {
         }
       }
 
-      $sql_values_lots[] = "(" . implode(', ', $cols)  . ")";
+      $sqlValuesLots[] = "(" . implode(', ', $cols)  . ")";
     }
 
     // Lots Values to String
-    $sql_values_lots = implode(', ', $sql_values_lots);
+    $sqlValuesLots = implode(', ', $sqlValuesLots);
 
     mysqli_query(
       $con,
@@ -150,7 +150,7 @@ try {
         "winner_id " .
         ") " .
         "VALUES " .
-        "$sql_values_lots"
+        "$sqlValuesLots"
     );
 
     $logs['lots']['success'] = true;
@@ -158,14 +158,14 @@ try {
     // Bets
     try {
       // Bets Values to String
-      $sql_values_bets = implode(', ', $sql_values_bets);
+      $sqlValuesBets = implode(', ', $sqlValuesBets);
 
       mysqli_query(
         $con,
         "INSERT INTO " .
           "bets (price, user_id, lot_id) " .
           "VALUES " .
-          "$sql_values_bets"
+          "$sqlValuesBets"
       );
 
       $logs['bets']['success'] = true;
