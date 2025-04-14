@@ -14,6 +14,8 @@ uploads/*
 # exception to the rule
 !uploads/.gitkeep
 
-db.php
+env/*
+
+!env/.gitkeep
 
 .osp/*
