@@ -1,27 +1,3 @@
-<?php
-require_once 'controllers/CategoryController.php';
-
-// Index Page Flag
-$isIndex = pathinfo($filePath, PATHINFO_BASENAME) === 'index.php';
-
-// Auth User Flag
-$isAuth = rand(0, 1);
-
-// User Name
-$userName = 'Елена К.'; // укажите здесь ваше имя
-
-// Get list of Categories
-$category = new CategoryController();
-
-['data' => $categories, 'error' => $error] = $category->getList($dbConnection);
-
-if (is_array($categories)) {
-  $nav = includeTemplate('components/nav.php', ['categories' => $categories]);
-} else if (isset($error['message'])) {
-  print($error['message']);
-}
-?>
-
 <!DOCTYPE html>
 <html lang="ru">
 
@@ -68,29 +44,13 @@ if (is_array($categories)) {
       </div>
     </header>
 
-    <main class="container">
-      <?php if ($isIndex && isset($categories) && is_array($categories)): ?>
-        <section class="promo">
-          <h2 class="promo__title">Нужен стафф для катки?</h2>
-          <p class="promo__text">На нашем интернет-аукционе ты найдёшь самое эксклюзивное сноубордическое и горнолыжное снаряжение.</p>
-          <ul class="promo__list">
-            <?php foreach ($categories as $key => $category): ?>
-              <li class="promo__item promo__item--<?= $category['slug']; ?>">
-                <a class="promo__link" href="pages/all-lots.html"><?= $category['title']; ?></a>
-              </li>
-            <?php endforeach; ?>
-          </ul>
-        </section>
-      <?php elseif (!$isIndex && isset($nav)) : ?>
-        <?= $nav; ?>
-      <?php endif; ?>
-
+    <main class="<?= !$isFull ? 'container' : ''; ?>">
       <?= $content; ?>
     </main>
   </div>
 
   <footer class="main-footer">
-    <?= isset($nav) ? $nav : ''; ?>
+    <?= $nav ?? ''; ?>
     <div class="main-footer__bottom container">
       <div class="main-footer__copyright">
         <p>© 2019, YetiCave</p>

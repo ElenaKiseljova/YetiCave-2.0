@@ -1,6 +1,8 @@
 <?php
-require_once 'helpers.php';
-require_once 'set.php';
+require_once 'utils/helpers.php';
+require_once 'utils/set.php';
+require_once 'utils/auth.php';
+require_once 'utils/categories.php';
 require_once 'controllers/LotController.php';
 
 $lotId = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
@@ -24,13 +26,15 @@ if (!$lotData) {
 
 $lotTitle = isset($lotData['title']) ? htmlspecialchars($lotData['title']) : 'Лот';
 
-$pageContent = includeTemplate('pages/lot.php', ['title' => $lotTitle, 'lot' => $lotData]);
+$pageContent = includeTemplate('pages/lot.php', ['title' => $lotTitle, 'lot' => $lotData, 'nav' => $nav]);
 
 $layoutData = [
+  'isFull' => true,
   'title' => $lotTitle,
   'content' => $pageContent,
-  'dbConnection' => $con,
-  'filePath' => __FILE__
+  'nav' => $nav,
+  'isAuth' => $isAuth,
+  'userName' => $userName
 ];
 $layoutContent = includeTemplate('layout.php', $layoutData);
 

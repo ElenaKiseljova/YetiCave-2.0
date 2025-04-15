@@ -17,6 +17,8 @@ $priceStep = $lot['price_step'] ?? 0;
 // Image
 $image = htmlspecialchars($lot['image']);
 ?>
+
+<?= $nav ?? ''; ?>
 <section class="lot-item container">
   <h2><?= $title; ?></h2>
   <div class="lot-item__content">

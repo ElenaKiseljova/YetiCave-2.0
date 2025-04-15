@@ -1,6 +1,8 @@
 <?php
-require_once 'helpers.php';
-require_once 'set.php';
+require_once 'utils/helpers.php';
+require_once 'utils/set.php';
+require_once 'utils/auth.php';
+require_once 'utils/categories.php';
 require_once 'controllers/LotController.php';
 
 // Get list of Lots
@@ -16,13 +18,14 @@ if (!$lots) {
   die();
 }
 
-$pageContent = includeTemplate('pages/index.php', ['lots' => $lots]);
+$pageContent = includeTemplate('pages/index.php', ['categories' => $categories, 'lots' => $lots]);
 
 $layoutData = [
   'title' => 'Главная',
   'content' => $pageContent,
-  'dbConnection' => $con,
-  'filePath' => __FILE__
+  'nav' => $nav,
+  'isAuth' => $isAuth,
+  'userName' => $userName
 ];
 $layoutContent = includeTemplate('layout.php', $layoutData);
 
