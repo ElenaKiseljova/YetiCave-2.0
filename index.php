@@ -1,12 +1,7 @@
 <?php
 require_once 'helpers.php';
-require_once 'controllers/DBController.php';
+require_once 'set.php';
 require_once 'controllers/LotController.php';
-
-// Connect to the database
-$db = new DBController();
-
-$con = $db->connect();
 
 // Get list of Lots
 $lot = new LotController();

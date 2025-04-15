@@ -1,11 +1,6 @@
 <?php
 require_once 'helpers.php';
-require_once 'controllers/DBController.php';
-
-// Connect to the database
-$db = new DBController();
-
-$con = $db->connect();
+require_once 'set.php';
 
 $pageContent = includeTemplate('pages/error.php');
 
