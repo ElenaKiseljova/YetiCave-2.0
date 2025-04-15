@@ -191,12 +191,18 @@ class DBController
 
       $response['success'] = !!$result;
     } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
       if ($errorCode = mysqli_errno($con)) {
-        $response['error'] = [
-          'code' => $errorCode,
-          'message' => 'Cannot create table: ' . mysqli_error($con)
-        ];
+        $errorMessage = 'Cannot create table: ' . mysqli_error($con);
       }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
     }
 
     return $response;

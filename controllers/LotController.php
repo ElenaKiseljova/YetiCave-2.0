@@ -59,15 +59,96 @@ class LotController
       $response['data'] = $rows;
       $response['success'] = true;
     } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
       // Request error
       if ($errorCode = mysqli_errno($con)) {
         $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
-
-        $response['error'] = [
-          'code' => $errorCode,
-          'message' => $errorMessage
-        ];
       }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param int $id
+   * @return array
+   */
+  public function getItem($con, $id)
+  {
+    $id = intval($id);
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlLot =
+        "SELECT " .
+        "l.id, " .
+        "l.slug, " .
+        "l.title, " .
+        "price_start, " .
+        "MAX(b.price) price_current, " .
+        "price_step, " .
+        "image, " .
+        "expiration_date, " .
+        "l.created_at, " .
+        "description, " .
+        "winner_id, " .
+        "l.user_id, " .
+        "category_id, " .
+        "c.title category_name " .
+        "FROM " .
+        "categories c " .
+        "RIGHT JOIN ( " .
+        "lots l " .
+        "LEFT JOIN bets b ON l.id = b.lot_id " .
+        ") ON l.category_id = c.id " .
+        "WHERE " .
+        "l.id = ? " .
+        "GROUP BY " .
+        "l.id ";
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlLot, [$id]);
+
+      mysqli_stmt_execute($stmt);
+
+      // Create query for geting list of Lots
+      $result = mysqli_stmt_get_result($stmt);
+
+      // Request success
+      $row = mysqli_fetch_assoc($result);
+
+      if ($row) {
+        $response['data'] = $row;
+        $response['success'] = true;
+      } else {
+        throw new Exception("Lot ID #$id does not exist", 404);
+      }
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = "Getting Lot #$id failed due to an error: " . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
     }
 
     return $response;

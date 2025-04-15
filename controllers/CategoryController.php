@@ -26,15 +26,18 @@ class CategoryController
       $response['data'] = $rows;
       $response['success'] = true;
     } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
       // Request error
       if ($errorCode = mysqli_errno($con)) {
         $errorMessage = 'Getting list of Categories failed due to an error: ' . mysqli_error($con);
-
-        $response['error'] = [
-          'code' => $errorCode,
-          'message' => $errorMessage
-        ];
       }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
     }
 
     return $response;
