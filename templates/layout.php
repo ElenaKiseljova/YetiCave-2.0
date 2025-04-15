@@ -1,4 +1,6 @@
 <?php
+require_once 'controllers/CategoryController.php';
+
 // Index Page Flag
 $isIndex = pathinfo($filePath, PATHINFO_BASENAME) === 'index.php';
 

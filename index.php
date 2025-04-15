@@ -2,7 +2,6 @@
 require_once 'helpers.php';
 require_once 'controllers/DBController.php';
 require_once 'controllers/LotController.php';
-require_once 'controllers/CategoryController.php';
 
 // Connect to the database
 $db = new DBController();
@@ -14,8 +13,10 @@ $lot = new LotController();
 
 ['data' => $lots, 'error' => $error] = $lot->getList($con);
 
-if (isset($error['message'])) {
-  print($error['message']);
+if (!$lots) {
+  if (isset($error['message'])) {
+    print($error['message']);
+  }
 
   die();
 }

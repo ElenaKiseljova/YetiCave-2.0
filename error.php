@@ -1,7 +1,6 @@
 <?php
 require_once 'helpers.php';
 require_once 'controllers/DBController.php';
-require_once 'controllers/CategoryController.php';
 
 // Connect to the database
 $db = new DBController();
