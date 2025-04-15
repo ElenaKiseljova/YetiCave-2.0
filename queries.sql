@@ -159,6 +159,7 @@ SELECT
   l.title,
   price_start,
   MAX(b.price) price_current,
+  price_step,
   image,
   expiration_date,
   l.created_at,
@@ -168,9 +169,11 @@ SELECT
   category_id,
   c.title category_name
 FROM
-  lots l
-  JOIN categories c ON l.category_id = c.id
-  JOIN bets b ON l.id = b.lot_id
+  categories c
+  RIGHT JOIN (
+    lots l
+    LEFT JOIN bets b ON l.id = b.lot_id
+  ) ON l.category_id = c.id
 WHERE
   l.id = 9
 GROUP BY
