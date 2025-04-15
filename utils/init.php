@@ -1,8 +1,8 @@
 <?php
 // Source: schema.sql
 
-require_once 'env/db.php';
-require_once 'controllers/DBController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/env/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 
 // Connect to the database with manualy select DB
 $db = new DBController();

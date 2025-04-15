@@ -1,10 +1,11 @@
 <?php
 // Source: queries.sql
 
-require_once 'controllers/DBController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/env/db.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 
 // when installed via composer
-require 'vendor/autoload.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 
 // Connect with database
 $db = new DBController();
@@ -93,7 +94,7 @@ try {
       $cols = [
         'slug' => $faker->slug(2),
         'title' => addslashes($faker->sentence(mt_rand(3, 6))),
-        'image' => "img/lot-" . mt_rand(1, 6) . ".jpg",
+        'image' => "lot-" . mt_rand(1, 6) . ".jpg",
         'description' => addslashes($faker->paragraph()),
         'price_start' => mt_rand(1000, 1000000),
         'price_step' => mt_rand(100, 1000),
