@@ -169,6 +169,31 @@ function getTimeLeft($dateString): array
 }
 
 /**
+ * @param string $date
+ * @param array $classes
+ * @retrn string
+ */
+function getTimerHTML($date, $classes = [])
+{
+  // String of classes
+  $classes = implode(' ', $classes);
+
+  $time = getTimeLeft(htmlspecialchars($date));
+  $hours = $time[0];
+  $minutes = $time[1];
+
+  $timerClasses = $hours < 1 ? 'timer--finishing' : '';
+  $timerText = str_pad($hours, 2, '0', STR_PAD_LEFT) . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT);
+
+
+  return "
+        <div class='$classes timer $timerClasses'>
+          $timerText
+        </div>
+      ";
+}
+
+/**
  * Возвращает ссылку с сохраненными квери-параметрами
  * @param string $filePath
  * @param array $newParameters
