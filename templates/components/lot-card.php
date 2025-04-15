@@ -1,6 +1,6 @@
 <li class="lots__item lot">
   <div class="lot__image">
-    <img src="<?= htmlspecialchars($lot['image']); ?>" width="350" height="260" alt="<?= htmlspecialchars($lot['title']); ?>">
+    <img src="<?= getFilePath(htmlspecialchars($lot['image'])); ?>" width="350" height="260" alt="<?= htmlspecialchars($lot['title']); ?>">
   </div>
   <div class="lot__info">
     <span class="lot__category"><?= $lot['category_name']; ?></span>

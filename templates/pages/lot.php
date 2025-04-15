@@ -15,7 +15,7 @@ $price = isset($priceCurrent) ? $priceCurrent : $lot['price_start'];
 $priceStep = $lot['price_step'] ?? 0;
 
 // Image
-$image = htmlspecialchars($lot['image']);
+$image = getFilePath(htmlspecialchars($lot['image']));
 ?>
 
 <?= $nav ?? ''; ?>

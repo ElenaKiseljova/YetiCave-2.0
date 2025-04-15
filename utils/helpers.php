@@ -272,3 +272,15 @@ function isCorrectLength($name, $min, $max)
     return "Значение должно быть от $min до $max символов";
   }
 }
+
+/**
+ * Возвращает путь к файлу в сторе
+ * @param string $filePath
+ * @return string
+ */
+function getFilePath($filePath = '')
+{
+  $STORE = '/uploads/';
+
+  return $STORE . $filePath;
+}
