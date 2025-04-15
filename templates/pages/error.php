@@ -29,7 +29,6 @@ $errorTitle = isset($errorMessages[$errorCode]) ? $errorMessages[$errorCode]['ti
 $errorDescription = isset($errorMessages[$errorCode]) ? $errorMessages[$errorCode]['description'] : 'Попробуйте воспользоваться навигацией и посетить другие страницы.';
 ?>
 
-<?= isset($nav) ? $nav : ''; ?>
 <section class="lot-item container">
   <h2><?= $errorCode; ?> <?= $errorTitle; ?></h2>
   <p><?= $errorDescription; ?></p>
