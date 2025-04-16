@@ -4,8 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <title><?= $title; ?></title>
-  <link href="../css/normalize.min.css" rel="stylesheet">
-  <link href="../css/style.css" rel="stylesheet">
+  <link rel="shortcut icon" href="img/favicon.png" type="image/png">
+  <link href="css/libs/normalize.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+
+  <?php if (isset($styles) && is_array($styles)): ?>
+    <?php foreach ($styles as $key => $style): ?>
+      <link href="<?= $style; ?>" rel="stylesheet">
+    <?php endforeach; ?>
+  <?php endif; ?>
 </head>
 
 <body>
@@ -15,7 +22,7 @@
       <div class="main-header__container container">
         <h1 class="visually-hidden">YetiCave</h1>
         <a href="/" class="main-header__logo">
-          <img src="../img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
+          <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
         </a>
         <form class="main-header__search" method="get" action="https://echo.htmlacademy.ru" autocomplete="off">
           <input type="search" name="search" placeholder="Поиск лота">
@@ -105,8 +112,8 @@
     </div>
   </footer>
 
-  <script src="flatpickr.js"></script>
-  <script src="script.js"></script>
+  <script src="js/libs/flatpickr.js"></script>
+  <script src="js/script.js"></script>
 </body>
 
 </html>
