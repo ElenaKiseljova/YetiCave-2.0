@@ -28,8 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
             image.src = imgUrl;
           }
         } else {
-          fileInput.value = null;
-
           alert("File is not image!");
         }
       });

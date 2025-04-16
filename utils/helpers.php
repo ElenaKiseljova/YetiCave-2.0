@@ -19,7 +19,7 @@ function isDateValid(string $date): bool
   $formatToCheck = 'Y-m-d';
   $dateTimeObj = date_create_from_format($formatToCheck, $date);
 
-  return $dateTimeObj !== false && ($errs = date_get_last_errors()) ? array_sum($errs) === 0 : true;
+  return $dateTimeObj !== false && ($errs = date_get_last_errors()) ? array_sum($errs) === 0 : !!$dateTimeObj;
 }
 
 /**
@@ -230,7 +230,27 @@ function getUrlWithQuery($filePath, $newParameters = [], $pathName = 'file')
  */
 function getPostVal($name)
 {
-  return $_POST[$name] ?? "";
+  return isset($_POST[$name]) ? htmlspecialchars($_POST[$name]) : "";
+}
+
+/**
+ * Возвращает CSS класс ошибки поля
+ * @param bool $isError
+ * @return string
+ */
+function getFieldErrorClass($isError)
+{
+  return $isError ? "form__item--invalid" : "";
+}
+
+/**
+ * Возвращает CSS класс ошибки поля ввода
+ * @param bool $isError
+ * @return string
+ */
+function getInputErrorClass($isError)
+{
+  return $isError ? "form__input--error" : "";
 }
 
 /**
@@ -252,7 +272,7 @@ function validateEmail($name)
  */
 function validateFilled($name)
 {
-  if (empty($_POST[$name])) {
+  if (empty(trim($_POST[$name] ?? ''))) {
     return "Это поле должно быть заполнено";
   }
 }
@@ -264,12 +284,36 @@ function validateFilled($name)
  * @param int $max
  * @return string|null
  */
-function isCorrectLength($name, $min, $max)
+function validateLength($name, $min, $max)
 {
-  $len = strlen($_POST[$name]);
+  $len = strlen(trim($_POST[$name] ?? ''));
 
   if ($len < $min or $len > $max) {
     return "Значение должно быть от $min до $max символов";
+  }
+}
+
+/**
+ * Проверка формата даты
+ * @param string $name
+ * @return string|null
+ */
+function validateDate($name)
+{
+  if (!isDateValid(trim($_POST[$name] ?? ''))) {
+    return "Дата должна быть в формате ГГГГ-ММ-ДД";
+  }
+}
+
+/**
+ * Проверка целого числа
+ * @param string $name
+ * @return string|null
+ */
+function validateInt($name)
+{
+  if (!intval(trim($_POST[$name] ?? ''))) {
+    return "Значение должно быть целым числом";
   }
 }
 
@@ -278,9 +322,9 @@ function isCorrectLength($name, $min, $max)
  * @param string $filePath
  * @return string
  */
-function getFilePath($filePath = '')
+function getFilePath($filePath)
 {
-  $STORE = '/uploads/';
+  $STORE = 'uploads/';
 
   return $STORE . $filePath;
 }
