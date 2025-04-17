@@ -25,8 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   // IDs of Categories
   $catIds = array_column($categories, 'id');
 
-  $lot = $_POST;
-
   // Required fields
   $required = ['title', 'slug', 'category_id', 'description', 'image', 'price_start', 'price_step', 'expiration_date'];
 
@@ -58,8 +56,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     },
   ];
 
+  // Create an array with the correct sequence of values ​​for STMT
+  $options = [
+    'slug' => FILTER_UNSAFE_RAW,
+    'title' => FILTER_UNSAFE_RAW,
+    'image' => FILTER_UNSAFE_RAW,
+    'description' => FILTER_UNSAFE_RAW,
+    'price_start' => FILTER_UNSAFE_RAW,
+    'price_step' => FILTER_UNSAFE_RAW,
+    'expiration_date' => FILTER_UNSAFE_RAW,
+    'category_id' => FILTER_UNSAFE_RAW
+  ];
+
+  $lot = filter_input_array(INPUT_POST, $options, true);
+
   // Run validation fields
   foreach ($lot as $key => $value) {
+    if ($key === 'image') {
+      continue;
+    }
+
     $hasValue = !empty(trim($value ?? ''));
 
     // Custome validation check
@@ -74,19 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 
-  // Create an array with the correct sequence of values ​​for STMT
-  $options = [
-    'slug' => FILTER_UNSAFE_RAW,
-    'title' => FILTER_UNSAFE_RAW,
-    'image' => FILTER_UNSAFE_RAW,
-    'description' => FILTER_UNSAFE_RAW,
-    'price_start' => FILTER_VALIDATE_INT,
-    'price_step' => FILTER_VALIDATE_INT,
-    'expiration_date' => FILTER_UNSAFE_RAW,
-    'category_id' => FILTER_VALIDATE_INT
-  ];
 
-  $lot = filter_input_array(INPUT_POST, $options, true);
 
   // Check file
   if (isset($_FILES['image']) && $_FILES['image']['name'] && in_array('image', $required)) {
@@ -121,16 +125,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lot['image'] = $fileName;
       }
     }
-  } else if (!isset($errors['image'])) {
+  } else {
     $errors['image'] = 'Выберите файл';
   }
 
   $errors = array_filter($errors);
 
   if (empty($errors)) {
-    // Trim
+    // Formatting data
     foreach ($lot as $key => $value) {
-      if (is_string($value)) {
+      if (is_numeric($value)) {
+        // To integer
+        $lot[$key] = intval($value);
+      } else if (is_string($value)) {
+        // Trim spaces
         $lot[$key] = trim($value);
       }
     }
