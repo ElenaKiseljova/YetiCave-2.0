@@ -4,6 +4,7 @@ require_once 'utils/set.php';
 require_once 'utils/auth.php';
 require_once 'utils/categories.php';
 require_once 'controllers/DBController.php';
+require_once 'controllers/LotController.php';
 
 $pageContentData = [
   'categories' => $categories,
@@ -11,54 +12,94 @@ $pageContentData = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $lotCon = new LotController();
+
+  // Getting slugs of Lots
+  ['data' => $lotsSlugs] = $lotCon->getAllCol($con, 'slug');
+
+  // Slugs of Lots
+  if (is_array($lotsSlugs)) {
+    $lotsSlugs = array_column($lotsSlugs, 'slug');
+  }
+
+  // IDs of Categories
+  $catIds = array_column($categories, 'id');
+
   $lot = $_POST;
+
+  // Required fields
+  $required = ['title', 'slug', 'category_id', 'description', 'image', 'price_start', 'price_step', 'expiration_date'];
 
   // Array of Errors
   $errors = [];
+
   // Validation rules
   $rules = [
-    'category_id' => function () {
-      return validateFilled('category_id');
+    'category_id' => function ($value) use ($catIds) {
+      return validateCategory($value, $catIds);
     },
-    'title' => function () {
-      return validateLength('title', 10, 200);
+    'title' => function ($value) {
+      return validateLength($value, 10, 200);
     },
-    'slug' => function () {
-      return validateLength('slug', 5, 200);
+    'slug' => function ($value) use ($lotsSlugs) {
+      return validateSlug($value, $lotsSlugs, 5, 200);
     },
-    'description' => function () {
-      return validateLength('description', 10, 3000);
+    'description' => function ($value) {
+      return validateLength($value, 10, 3000);
     },
-    'expiration_date' => function () {
-      return validateDate('expiration_date');
+    'expiration_date' => function ($value) {
+      return validateDate($value, date('Y-m-d'));
     },
-    'price_start' => function () {
-      return validateInt('price_start');
+    'price_start' => function ($value) {
+      return validateInt($value);
     },
-    'price_step' => function () {
-      return validateInt('price_step');
+    'price_step' => function ($value) {
+      return validateInt($value);
     },
   ];
 
-  // Check lot fields
+  // Run validation fields
   foreach ($lot as $key => $value) {
-    if (isset($rules[$key])) {
+    $hasValue = !empty(trim($value ?? ''));
+
+    // Custome validation check
+    if ($hasValue && isset($rules[$key])) {
       $rule = $rules[$key];
-      $errors[$key] = $rule();
+      $errors[$key] = $rule($value);
+    }
+
+    // Required check
+    if (!$hasValue && in_array($key, $required)) {
+      $errors[$key] = "Поле $key обязательно для заполнения";
     }
   }
 
+  // Create an array with the correct sequence of values ​​for STMT
+  $options = [
+    'slug' => FILTER_UNSAFE_RAW,
+    'title' => FILTER_UNSAFE_RAW,
+    'image' => FILTER_UNSAFE_RAW,
+    'description' => FILTER_UNSAFE_RAW,
+    'price_start' => FILTER_VALIDATE_INT,
+    'price_step' => FILTER_VALIDATE_INT,
+    'expiration_date' => FILTER_UNSAFE_RAW,
+    'category_id' => FILTER_VALIDATE_INT
+  ];
+
+  $lot = filter_input_array(INPUT_POST, $options, true);
+
   // Check file
-  if (isset($_FILES['image']) && $_FILES['image']['size']) {
+  if (isset($_FILES['image']) && $_FILES['image']['name'] && in_array('image', $required)) {
     $file = $_FILES['image'];
 
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $fileTmpPath = $file['tmp_name'];
     $fileSize = $file['size'];
     $fileName = $file['name'];
 
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
     $fileType = finfo_file($finfo, $fileTmpPath);
 
+    // Validation
     if (!in_array($fileType, ['image/png', 'image/jpg', 'image/jpeg'])) {
       $errors['image'] = 'Файл может быть только c расширением .png, .jpg, .jpeg';
     } else if ($fileSize > 1000000) {
@@ -68,45 +109,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $extension = array_reverse(explode('.', $fileName))[0];
 
       // Generate new name
-      $fileName = uniqid() . '.' . $extension;
-
-      // Add path
-      $lot['image'] = $fileName;
+      $fileName = uniqid('lot-') . '.' . $extension;
 
       // Move file
       $moved = move_uploaded_file($fileTmpPath, getFilePath($fileName));
 
       if (!$moved) {
         $errors['image'] = 'Не удалось сохранить файл';
+      } else {
+        // Update Lot image path
+        $lot['image'] = $fileName;
       }
     }
-  } else {
+  } else if (!isset($errors['image'])) {
     $errors['image'] = 'Выберите файл';
   }
-
-  // Category ID exists
-
-  // Slug is unique
 
   $errors = array_filter($errors);
 
   if (empty($errors)) {
+    // Trim
+    foreach ($lot as $key => $value) {
+      if (is_string($value)) {
+        $lot[$key] = trim($value);
+      }
+    }
+
     // Create lot
-    $sqlString = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_id, category_id )' .
-      'VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, ?)';
+    ['error' => $lotCreateError] = $lotCon->create($con, $lot);
 
-    $stmt = DBController::getPrepareSTMT($con, $sqlString, [$lot['slug'], $lot['title'], $lot['image'], $lot['description'], $lot['price_start'], $lot['price_step'], $lot['expiration_date'], $lot['category_id']]);
-
-    $result = mysqli_stmt_execute($stmt);
-
-    if ($result) {
-      // Get lot id
-      $lotId = mysqli_insert_id($con);
-
-      // Redirect to the lot page
-      header('Location: /lot?id=' . $lotId);
-    } else {
-      $errors['global'] = mysqli_error($con);
+    if (isset($lotCreateError['message'])) {
+      $errors['global'] = $lotCreateError['message'];
     }
   }
 

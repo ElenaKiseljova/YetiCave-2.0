@@ -267,26 +267,26 @@ function validateEmail($name)
 
 /**
  * Проверка заполненности
- * @param string $name
+ * @param ?string $value
  * @return string|null
  */
-function validateFilled($name)
+function validateFilled($value)
 {
-  if (empty(trim($_POST[$name] ?? ''))) {
+  if (empty(trim($value ?? ''))) {
     return "Это поле должно быть заполнено";
   }
 }
 
 /**
  * Проверка длины
- * @param string $name
+ * @param ?string $value
  * @param int $min
  * @param int $max
  * @return string|null
  */
-function validateLength($name, $min, $max)
+function validateLength($value, $min, $max)
 {
-  $len = strlen(trim($_POST[$name] ?? ''));
+  $len = strlen(trim($value ?? ''));
 
   if ($len < $min or $len > $max) {
     return "Значение должно быть от $min до $max символов";
@@ -295,25 +295,90 @@ function validateLength($name, $min, $max)
 
 /**
  * Проверка формата даты
- * @param string $name
+ * @param ?string $value
+ * @param ?string $min
+ * @param ?string $max
  * @return string|null
  */
-function validateDate($name)
+function validateDate($value, $min = null, $max = null)
 {
-  if (!isDateValid(trim($_POST[$name] ?? ''))) {
+  $value = trim($value ?? '');
+
+  if (!isDateValid($value)) {
     return "Дата должна быть в формате ГГГГ-ММ-ДД";
+  }
+
+  // Min
+  $min = trim($min ?? '');
+  $haveMin = $min && isDateValid($min);
+
+  // Max
+  $max = trim($max ?? '');
+  $haveMax = $max && isDateValid($max);
+
+  // Check min and max
+  if ($haveMin || $haveMax) {
+    date_default_timezone_set('Europe/Kyiv');
+
+    $endDate = date_create($value);
+
+    $minDate = $haveMin ? date_create($min) : null;
+    $maxDate  = $haveMax ? date_create($max) : null;
+
+    if (!!$minDate && $endDate < $minDate) {
+      return "Дата не может быть раньше $min";
+    }
+
+    if (!!$maxDate && $endDate > $maxDate) {
+      return "Дата не может быть позже $max";
+    }
   }
 }
 
 /**
  * Проверка целого числа
- * @param string $name
+ * @param ?string|number $value
  * @return string|null
  */
-function validateInt($name)
+function validateInt($value)
 {
-  if (!intval(trim($_POST[$name] ?? ''))) {
-    return "Значение должно быть целым числом";
+  $value = trim($value ?? '');
+  $valueInt = intval($value);
+
+  if (!$valueInt || strval($valueInt) !== $value) {
+    return "Значение должно быть целым числом больше 0";
+  }
+}
+
+/**
+ * Проверка slug
+ * @param ?string $value
+ * @param array $notAllowedSlugs
+ * @param int $min
+ * @param int $max
+ * @return string|null
+ */
+function validateSlug($value, $notAllowedSlugs, $min, $max)
+{
+  if (in_array(trim($value ?? ''), $notAllowedSlugs)) {
+    return 'Слаг уже существует';
+  }
+
+  if ($lenErr = validateLength($value, $min, $max)) {
+    return $lenErr;
+  }
+}
+
+/**
+ * Проверка category id
+ * @param ?int $value
+ * @param array $allowedIds
+ * @return string|null
+ */
+function validateCategory($value, $allowedIds)
+{
+  if (!in_array($value, $allowedIds)) {
+    return 'Категория не существует';
   }
 }
 

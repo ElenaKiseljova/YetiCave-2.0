@@ -153,4 +153,92 @@ class LotController
 
     return $response;
   }
+
+  /**
+   * @param \mysqli $con
+   * @param string $colum id, slug, etc.
+   * @return array
+   */
+  public function getAllCol($con, $colum = 'id')
+  {
+    $colum = strip_tags(trim($colum));
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlColLots = "SELECT $colum FROM lots";
+
+      $result = mysqli_query($con, $sqlColLots);
+
+      $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+      $response['data'] = $rows;
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of «' . $colum . '» Lots failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param array $data
+   * @return array
+   */
+  public function create($con, $data)
+  {
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_id, category_id )' .
+        'VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, ?)';
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlLot, $data);
+
+      mysqli_stmt_execute($stmt);
+
+      // Get lot id
+      $lotId = mysqli_insert_id($con);
+
+      // Redirect to the lot page
+      header('Location: /lot?id=' . $lotId);
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Creating Lot failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
 }

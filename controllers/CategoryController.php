@@ -42,4 +42,47 @@ class CategoryController
 
     return $response;
   }
+
+  /**
+   * @param \mysqli $con
+   * @param string $colum id, slug, etc.
+   * @return array
+   */
+  public function getAllCol($con, $colum = 'id')
+  {
+    $colum = strip_tags(trim($colum));
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlColLots = "SELECT $colum FROM categories";
+
+      $result = mysqli_query($con, $sqlColLots);
+
+      $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+      $response['data'] = $rows;
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of «' . $colum . '» Categories failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
 }
