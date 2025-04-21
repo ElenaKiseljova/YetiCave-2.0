@@ -52,7 +52,7 @@ try {
     $cols = [
       'name' => addslashes($faker->name()),
       'email' => $faker->email(),
-      'password' => 'password',
+      'password' => password_hash('password', PASSWORD_DEFAULT),
       'address' => addslashes($faker->address()),
     ];
 
