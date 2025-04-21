@@ -78,6 +78,140 @@ class LotController
 
   /**
    * @param \mysqli $con
+   * @param ?string $search
+   * @return array
+   */
+  public function count($con, $search = '')
+  {
+    $search = trim(htmlspecialchars($search));
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Search SQL query string
+      $sqlLots = "SELECT COUNT(*) cnt FROM lots";
+
+      // If search no empty
+      if (!empty($search)) {
+        $sqlLots .= " WHERE MATCH (title, description) AGAINST (?)";
+
+        $stmt = DBController::getPrepareSTMT($con, $sqlLots, [$search]);
+
+        mysqli_stmt_execute($stmt);
+
+        // Create query for geting list of Lots
+        $result = mysqli_stmt_get_result($stmt);
+      } else {
+        $result = mysqli_query($con, $sqlLots);
+      }
+
+      // Request success
+      $row = mysqli_fetch_assoc($result);
+
+      $response['data'] = $row['cnt'];
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting count of Lots failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param int $perPage
+   * @param int $offset
+   * @param ?string $search
+   * @return array
+   */
+  public function paginate($con, $perPage = 9, $offset = 0, $search = '')
+  {
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Default
+      $sqlSearch = "";
+      $data = [];
+      if (!empty($search)) {
+        $sqlSearch = "WHERE MATCH (l.title, l.description) AGAINST (?) ";
+
+        $data[] = $search;
+      }
+
+      // Search SQL query string
+      $sqlLots =
+        "SELECT " .
+        "l.id, " .
+        "l.title, " .
+        "price_start, " .
+        "MAX(b.price) price_current, " .
+        "image, " .
+        "expiration_date, " .
+        "c.title category_name " .
+        " FROM " .
+        "categories c " .
+        "RIGHT JOIN ( " .
+        " lots l " .
+        "LEFT JOIN bets b ON l.id = b.lot_id " .
+        " ) ON l.category_id = c.id " .
+        $sqlSearch .
+        "GROUP BY " .
+        "l.id " .
+        "ORDER BY " .
+        "l.created_at DESC " .
+        "LIMIT ? OFFSET ?";
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlLots, [...$data, $perPage, $offset]);
+
+      mysqli_stmt_execute($stmt);
+
+      // Create query for geting list of Lots
+      $result = mysqli_stmt_get_result($stmt);
+
+      // Request success
+      $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+      $response['data'] = $rows;
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
    * @param int $id
    * @return array
    */

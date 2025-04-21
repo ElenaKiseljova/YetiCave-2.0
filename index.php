@@ -10,7 +10,7 @@ $lot = new LotController();
 
 ['data' => $lots, 'error' => $error] = $lot->getList($con);
 
-if (!$lots) {
+if ($error) {
   if (isset($error['message'])) {
     print($error['message']);
   }

@@ -194,13 +194,11 @@ function getTimerHTML($date, $classes = [])
 }
 
 /**
- * Возвращает ссылку с сохраненными квери-параметрами
- * @param string $filePath
+ * Возвращает обновленную квери строку с сохраненными квери-параметрами
  * @param array $newParameters
- * @param 'file'|'base' $pathName
  * @return string
  */
-function getUrlWithQuery($filePath, $newParameters = [], $pathName = 'file')
+function withQuery($newParameters = [])
 {
   // Summary array of parameters
   $params = [
@@ -208,19 +206,10 @@ function getUrlWithQuery($filePath, $newParameters = [], $pathName = 'file')
     ...$newParameters
   ];
 
-  // Flag
-  $pathName = $pathName === 'file' ? PATHINFO_FILENAME : PATHINFO_BASENAME;
-
-  // Base URL
-  $scriptname = pathinfo($filePath, $pathName);
-
   // Query string
   $query = http_build_query($params);
 
-  // Base URL with Query
-  $url = "/" . ($scriptname === 'index' ? '' : $scriptname) . "?" . $query;
-
-  return $url;
+  return '?' . $query;
 }
 
 /**
