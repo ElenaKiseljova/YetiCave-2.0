@@ -49,3 +49,5 @@ CREATE TABLE bets (
   FOREIGN KEY (lot_id) REFERENCES lots (id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE FULLTEXT INDEX lot_ft_search ON lots (title, description);

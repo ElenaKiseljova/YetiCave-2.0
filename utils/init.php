@@ -67,8 +67,9 @@ $createTableErrors = [];
     "FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL, " .
     "FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE, " .
     "FOREIGN KEY (winner_id) REFERENCES users (id) ON DELETE SET NULL, " .
-    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP " .
-    ");"
+    "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " .
+    "FULLTEXT (title, description)" .
+    ") ENGINE=InnoDB;"
 );
 
 // Create Bets table
