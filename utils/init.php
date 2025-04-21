@@ -31,8 +31,8 @@ $createTableErrors = [];
   "CREATE TABLE users ( " .
     "id INT AUTO_INCREMENT PRIMARY KEY, " .
     "email VARCHAR(128) NOT NULL UNIQUE, " .
-    "password CHAR(64) NOT NULL, " .
-    "name VARCHAR(64) NOT NULL, " .
+    "password VARCHAR(255) NOT NULL, " .
+    "name VARCHAR(64) NOT NULL UNIQUE, " .
     "contacts TEXT, " .
     "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP " .
     ");"

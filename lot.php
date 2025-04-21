@@ -26,7 +26,15 @@ if (!$lotData) {
 
 $lotTitle = isset($lotData['title']) ? htmlspecialchars($lotData['title']) : 'Лот';
 
-$pageContent = includeTemplate('pages/lot.php', ['title' => $lotTitle, 'lot' => $lotData, 'nav' => $nav]);
+$pageContentData = [
+  'title' => $lotTitle,
+  'lot' => $lotData,
+  'nav' => $nav,
+  'isAuth' => $isAuth,
+  'userId' => $userId
+];
+
+$pageContent = includeTemplate('pages/lot.php', $pageContentData);
 
 $layoutData = [
   'isFull' => true,

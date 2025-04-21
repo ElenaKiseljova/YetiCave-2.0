@@ -35,15 +35,15 @@
             <div class="user-menu__logged">
               <p><?= $userName; ?></p>
               <a class="user-menu__bets" href="pages/my-bets.html">Мои ставки</a>
-              <a class="user-menu__logout" href="#">Выход</a>
+              <a class="user-menu__logout" href="/logout">Выход</a>
             </div>
           <?php else: ?>
             <ul class="user-menu__list">
               <li class="user-menu__item">
-                <a href="#">Регистрация</a>
+                <a href="/register">Регистрация</a>
               </li>
               <li class="user-menu__item">
-                <a href="#">Вход</a>
+                <a href="/login">Вход</a>
               </li>
             </ul>
           <?php endif; ?>

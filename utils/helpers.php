@@ -255,12 +255,12 @@ function getInputErrorClass($isError)
 
 /**
  * Проверка на email
- * @param string $name
+ * @param string $value
  * @return string|null
  */
-function validateEmail($name)
+function validateEmail($value)
 {
-  if (!filter_input(INPUT_POST, $name, FILTER_VALIDATE_EMAIL)) {
+  if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
     return "Введите корректный email";
   };
 }

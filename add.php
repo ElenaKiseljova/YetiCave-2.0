@@ -6,6 +6,12 @@ require_once 'utils/categories.php';
 require_once 'controllers/DBController.php';
 require_once 'controllers/LotController.php';
 
+if (!$isAuth) {
+  header('Location: /login');
+
+  die();
+}
+
 $pageContentData = [
   'categories' => $categories,
   'nav' => $nav

@@ -1,6 +1,15 @@
 <?php
+session_start();
+
 // Auth User Flag
-$isAuth = rand(0, 1);
+$isAuth = false;
 
 // User Name
-$userName = 'Елена К.'; // укажите здесь ваше имя
+$userName = null;
+
+if (isset($_SESSION['user'])) {
+  $isAuth = true;
+
+  $userId = $_SESSION['user']['id'];
+  $userName = $_SESSION['user']['name'];
+}

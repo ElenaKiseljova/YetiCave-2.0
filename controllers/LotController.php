@@ -213,7 +213,7 @@ class LotController
     try {
       // Create SQL query string
       $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_id, category_id )' .
-        'VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, ?)';
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ' . $_SESSION['user']['id'] . ', NULL, ?)';
 
       $stmt = DBController::getPrepareSTMT($con, $sqlLot, $data);
 
