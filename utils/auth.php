@@ -1,4 +1,7 @@
 <?php
+require_once 'utils/set.php';
+require_once 'controllers/UserController.php';
+
 session_start();
 
 // Auth User Flag
@@ -8,8 +11,17 @@ $isAuth = false;
 $userName = null;
 
 if (isset($_SESSION['user'])) {
-  $isAuth = true;
+  $userCon = new UserController();
 
-  $userId = $_SESSION['user']['id'];
-  $userName = $_SESSION['user']['name'];
+  ['data' => $user] = $userCon->getBy($con, 'id', $_SESSION['user']['id']);
+
+  if (!$user) {
+    header('Location: /logout');
+  } else {
+    $isAuth = true;
+
+    // Set user variables
+    $userId = $user['id'];
+    $userName = $user['name'];
+  }
 }

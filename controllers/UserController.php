@@ -161,7 +161,6 @@ class UserController
       // Create session
       session_start();
 
-      $_SESSION['user']['name'] = $user['name'];
       $_SESSION['user']['id'] = $user['id'];
 
       // Redirect to the home page
