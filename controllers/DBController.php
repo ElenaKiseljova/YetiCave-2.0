@@ -55,6 +55,27 @@ class DBController
   }
 
   /**
+   * Устанавливает timezone в MySQL
+   *
+   * @param \mysqli $con
+   */
+  private function setTimezone($con)
+  {
+    $now = new DateTime();
+
+    $mins = $now->getOffset() / 60;
+
+    $sgn = ($mins < 0 ? -1 : 1);
+    $mins = abs($mins);
+    $hrs = floor($mins / 60);
+    $mins -= $hrs * 60;
+
+    $offset = sprintf('%+d:%02d', $hrs * $sgn, $mins);
+
+    mysqli_query($con, "SET time_zone='$offset'");
+  }
+
+  /**
    * @param \mysqli $con
    * @return mysqli|false
    */
@@ -92,6 +113,8 @@ class DBController
     try {
       // DB connect
       $con = mysqli_connect($dbParameters['host'], $dbParameters['user'], $dbParameters['password']);
+
+      $this->setTimezone($con);
 
       // DB success connect
       if (!$selectDbManualy) {
