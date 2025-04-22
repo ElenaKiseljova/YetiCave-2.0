@@ -356,9 +356,10 @@ class LotController
   /**
    * @param \mysqli $con
    * @param array $data
+   * @param int $userId
    * @return array
    */
-  public function create($con, $data)
+  public function create($con, $data, $userId)
   {
     $response = [
       'data' => null,
@@ -369,7 +370,7 @@ class LotController
     try {
       // Create SQL query string
       $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_id, category_id )' .
-        'VALUES (?, ?, ?, ?, ?, ?, ?, ' . $_SESSION['user']['id'] . ', NULL, ?)';
+        'VALUES (?, ?, ?, ?, ?, ?, ?, ' . $userId . ', NULL, ?)';
 
       $stmt = DBController::getPrepareSTMT($con, $sqlLot, $data);
 
