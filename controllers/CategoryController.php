@@ -17,7 +17,7 @@ class CategoryController
       // Create SQL query string
       $sqlCategories = "SELECT * FROM categories";
 
-      // Create query for geting list of Lots
+      // Create query for geting list of Categories
       $result = mysqli_query($con, $sqlCategories);
 
       // Request success
@@ -75,6 +75,51 @@ class CategoryController
       // Request error
       if ($errorCode = mysqli_errno($con)) {
         $errorMessage = 'Getting list of «' . $colum . '» Categories failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param int $id
+   * @return array
+   */
+  public function getById($con, $id)
+  {
+    $id = intval($id);
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Category SQL query string
+      $sqlCategory = "SELECT * FROM categories WHERE id = $id";
+
+      // Create query for geting Category
+      $result = mysqli_query($con, $sqlCategory);
+
+      // Request success
+      $row = mysqli_fetch_assoc($result);
+
+      $response['data'] = $row;
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = "Getting Category #$id failed due to an error: " . mysqli_error($con);
       }
 
       $response['error'] = [
