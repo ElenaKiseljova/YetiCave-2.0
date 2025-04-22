@@ -10,11 +10,11 @@
       $priceCurrent = $lot['price_current'];
       $price = isset($priceCurrent) ? $priceCurrent : $lot['price_start'];
 
-      $priceTitle = isset($priceCurrent) ? "Текущая цена" : "Стартовая цена";
-      $priceTitleColor = $priceCurrent ? "orange" : "green";
+      $betsCount = $lot['bets_cnt'] ?? 0;
+      $priceTitle = $betsCount ? ($betsCount . ' ' . getNounPluralForm($betsCount, 'ставка', 'ставки', 'ставок')) : "Стартовая цена";
       ?>
       <div class="lot__rate">
-        <span class="lot__amount" style="color: <?= $priceTitleColor; ?>"><?= $priceTitle; ?></span>
+        <span class="lot__amount"><?= $priceTitle; ?></span>
         <span class="lot__cost"><?= formatNum(htmlspecialchars($price)); ?></span>
       </div>
 
