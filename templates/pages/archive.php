@@ -1,6 +1,7 @@
+<?= $nav ?? ''; ?>
 <div class="container">
   <section class="lots">
-    <h2>Результаты поиска по запросу «<span><?= $search ?? ''; ?></span>»</h2>
+    <h2><?= $title ?? 'Список лотов'; ?> <?= isset($titleInQuote) ? "«<span>$titleInQuote</span>»" : ''; ?></h2>
 
     <?php if (isset($lots) && is_array($lots) && !empty($lots)): ?>
       <ul class="lots__list">
