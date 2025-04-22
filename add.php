@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       return validateLength($value, 10, 3000);
     },
     'expiration_date' => function ($value) {
-      return validateDate($value, date('Y-m-d'));
+      return validateDate($value, date('Y-m-d', strtotime('+ 1 day')));
     },
     'price_start' => function ($value) {
       return validateInt($value);
@@ -95,8 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $errors[$key] = "Поле $key обязательно для заполнения";
     }
   }
-
-
 
   // Check file
   if (isset($_FILES['image']) && $_FILES['image']['name'] && in_array('image', $required)) {
@@ -150,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Create lot
-    ['error' => $lotCreateError] = $lotCon->create($con, $lot);
+    ['error' => $lotCreateError] = $lotCon->create($con, $lot, $userId);
 
     if (isset($lotCreateError['message'])) {
       $errors['global'] = $lotCreateError['message'];
