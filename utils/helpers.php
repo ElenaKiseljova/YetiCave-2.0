@@ -69,6 +69,45 @@ function getNounPluralForm(int $number, string $one, string $two, string $many):
 }
 
 /**
+ * @param string $dateString YYYY-MM-DD HH:MM:SS
+ * @return string
+ */
+function diffForHumans($dateString): string
+{
+  $curDate = date_create();
+  $createdAtDate  = date_create($dateString);
+
+  $diff = date_diff($createdAtDate, $curDate);
+
+  // Days
+  if ($diff->d > 0) {
+    if ($diff->d === 1) {
+      return date_format($createdAtDate, 'Вчера, в H:i');
+    }
+
+    return date_format($createdAtDate, 'd.m.Y в H:i');
+  }
+
+  // Hours
+  if ($h = $diff->h > 0) {
+    return ($h === 1 ? 'Час' : ($h . ' ' . getNounPluralForm($h, 'час', 'часа', 'часов') . ' назад'));
+  }
+
+  // Minutes
+  if ($m = $diff->i > 0) {
+    return ($m === 1 ? 'Минуту' : ($m . ' ' . getNounPluralForm($m, 'минуту', 'минут', 'минут') . ' назад'));
+  }
+
+  // Seconds
+  if ($s = $diff->s > 0) {
+    return ($s === 1 ? 'Секунду' : ($s . ' ' . getNounPluralForm($s, 'секунду', 'секунды', 'секунд') . ' назад'));
+  }
+
+  // Just now
+  return 'Только что';
+}
+
+/**
  * Подключает шаблон, передает туда данные и возвращает итоговый HTML контент
  * @param string $name Путь к файлу шаблона относительно папки templates
  * @param array $data Ассоциативный массив с данными для шаблона
@@ -136,7 +175,6 @@ function getTimeLeft($dateString): array
     return [0, 0];
   }
 
-  date_default_timezone_set('Europe/Kyiv');
 
   // 1 - By Unixtime
   // $curDate = time();
@@ -307,7 +345,6 @@ function validateDate($value, $min = null, $max = null)
 
   // Check min and max
   if ($haveMin || $haveMax) {
-    date_default_timezone_set('Europe/Kyiv');
 
     $endDate = date_create($value);
 
