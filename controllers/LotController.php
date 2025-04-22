@@ -26,6 +26,7 @@ class LotController
         "l.title, " .
         "price_start, " .
         "MAX(b.price) price_current, " .
+        "COUNT(b.id) bets_cnt, " .
         "image, " .
         "expiration_date, " .
         "c.title category_name " .
@@ -78,13 +79,12 @@ class LotController
 
   /**
    * @param \mysqli $con
-   * @param ?string $search
+   * @param ?string|int $where
+   * @param ?'search'|'category $whereType
    * @return array
    */
-  public function count($con, $search = '')
+  public function count($con, $where = null, $whereType = 'search')
   {
-    $search = trim(htmlspecialchars($search));
-
     $response = [
       'data' => null,
       'success' => null,
@@ -92,21 +92,33 @@ class LotController
     ];
 
     try {
-      // Search SQL query string
-      $sqlLots = "SELECT COUNT(*) cnt FROM lots";
+      // Count SQL query string
+      $sqlLotsCount = "SELECT COUNT(*) cnt FROM lots";
 
-      // If search no empty
-      if (!empty($search)) {
-        $sqlLots .= " WHERE MATCH (title, description) AGAINST (?)";
+      // If Where
+      if (isset($where)) {
+        // For STMT
+        $data = [];
 
-        $stmt = DBController::getPrepareSTMT($con, $sqlLots, [$search]);
+        if ($whereType === 'search' && !empty(($search = htmlspecialchars(trim($where))))) {
+          $data[] = $search;
+
+          $sqlLotsCount .= " WHERE MATCH (title, description) AGAINST (?)";
+        } else  if ($whereType === 'category' && ($categoryId = intval($where))) {
+          $data[] = $categoryId;
+
+          $sqlLotsCount .=  " WHERE category_id = ?";
+        }
+
+
+        $stmt = DBController::getPrepareSTMT($con, $sqlLotsCount, $data);
 
         mysqli_stmt_execute($stmt);
 
         // Create query for geting list of Lots
         $result = mysqli_stmt_get_result($stmt);
       } else {
-        $result = mysqli_query($con, $sqlLots);
+        $result = mysqli_query($con, $sqlLotsCount);
       }
 
       // Request success
@@ -136,10 +148,11 @@ class LotController
    * @param \mysqli $con
    * @param int $perPage
    * @param int $offset
-   * @param ?string $search
+   * @param ?string|int $where
+   * @param ?'search'|'category' $whereType
    * @return array
    */
-  public function paginate($con, $perPage = 9, $offset = 0, $search = '')
+  public function paginate($con, $perPage = 9, $offset = 0, $where = null, $whereType = 'search')
   {
     $response = [
       'data' => null,
@@ -148,13 +161,21 @@ class LotController
     ];
 
     try {
-      // Default
-      $sqlSearch = "";
+      // Data for STMT
       $data = [];
-      if (!empty($search)) {
-        $sqlSearch = "WHERE MATCH (l.title, l.description) AGAINST (?) ";
 
-        $data[] = $search;
+      // Default Where
+      $sqlWhere = "";
+      if (isset($where)) {
+        if ($whereType === 'search' && !empty(($search = htmlspecialchars(trim($where))))) {
+          $data[] = $search;
+
+          $sqlWhere = "WHERE MATCH (l.title, l.description) AGAINST (?) ";
+        } else if ($whereType === 'category' && ($categoryId = intval($where))) {
+          $data[] = $categoryId;
+
+          $sqlWhere = "WHERE l.category_id = ? ";
+        }
       }
 
       // Search SQL query string
@@ -164,6 +185,7 @@ class LotController
         "l.title, " .
         "price_start, " .
         "MAX(b.price) price_current, " .
+        "COUNT(b.id) bets_cnt, " .
         "image, " .
         "expiration_date, " .
         "c.title category_name " .
@@ -173,7 +195,7 @@ class LotController
         " lots l " .
         "LEFT JOIN bets b ON l.id = b.lot_id " .
         " ) ON l.category_id = c.id " .
-        $sqlSearch .
+        $sqlWhere .
         "GROUP BY " .
         "l.id " .
         "ORDER BY " .
