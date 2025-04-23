@@ -3,190 +3,147 @@
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/env/db.php';
 require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/CategoryController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/UserController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/LotController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/BetController.php';
 
 // when installed via composer
 require $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 
 // Connect with database
-$db = new DBController();
+$dbCon = new DBController();
 
-$con = $db->connect();
+$con = $dbCon->connect();
 
 // use the factory to create a Faker\Generator instance
 $faker = Faker\Factory::create();
 
 // Seeds Tabels
 
-$USERS_COUNT = 5;
-$LOTS_COUNT = 25;
-$BETS_COUNT = 4;
+$USERS_COUNT = 7;
 
 // Logs
-$logs = [];
+$logs = [
+  'categories' => [],
+  'users' => [],
+  'lots' => [],
+  'bets' => []
+];
+
+$categoryCon = new CategoryController();
+$userCon = new UserController();
+$lotCon = new LotController();
+$betCon = new BetController();
 
 // Categories
-try {
-  mysqli_query(
-    $con,
-    "INSERT INTO " .
-      "categories (slug, title) " .
-      "VALUES " .
-      "('boards', 'Доски и лыжи'), " .
-      "('attachment', 'Крепления'), " .
-      "('boots', 'Ботинки'), " .
-      "('clothing', 'Одежда'), " .
-      "('tools', 'Инструменты'), " .
-      "('other', 'Разное') "
-  );
+$categories = [
+  'boards' => 'Доски и лыжи',
+  'attachment' => 'Крепления',
+  'boots' => 'Ботинки',
+  'clothing' => 'Одежда',
+  'tools' => 'Инструменты',
+  'other' => 'Разное'
+];
 
-  $logs['categories']['success'] = true;
-} catch (\Throwable $th) {
-  $logs['categories']['error'] = mysqli_error($con);
+foreach ($categories as $slug => $title) {
+  ['error' => $error] = $categoryCon->create($con, [$slug, $title]);
+
+  if (isset($error)) {
+    $logs['categories']['error'][$slug] = $error;
+  }
 }
 
 // Users
-try {
-  // Users Values Array
-  $sqlValuesUsers = [];
-  foreach (range(1, $USERS_COUNT) as $key) {
-    $cols = [
-      'name' => addslashes($faker->name()),
-      'email' => $faker->email(),
-      'password' => password_hash('password', PASSWORD_DEFAULT),
-      'address' => addslashes($faker->address()),
-    ];
+foreach (range(1, $USERS_COUNT) as $userId) {
+  $dataUser = [
+    'name' => addslashes($faker->name()),
+    'email' => $faker->email(),
+    'password' => 'password',
+    'contacts' => addslashes($faker->address()),
+  ];
 
-    foreach ($cols as $key => $col) {
-      if (!is_int($col)) {
-        $cols[$key] = "'" . $col . "'";
-      }
-    }
+  ['error' => $error] = $userCon->create($con, $dataUser, false);
 
-    $sqlValuesUsers[] = "(" . implode(', ', $cols)  . ")";
+  if (isset($error)) {
+    $logs['users']['error'][$userId] = $error;
   }
-
-  // Users Values to String
-  $sqlValuesUsers = implode(', ', $sqlValuesUsers);
-
-  mysqli_query(
-    $con,
-    "INSERT INTO " .
-      "users (name, email, password, contacts) " .
-      "VALUES " .
-      "$sqlValuesUsers"
-  );
-
-  $logs['users']['success'] = true;
-
-  // Lots
-  try {
-    // Lots Values Array
-    $sqlValuesLots = [];
-
-    // Bets Values Array
-    $sqlValuesBets = [];
-
-    foreach (range(1, $LOTS_COUNT) as $lotId) {
-      $userId = mt_rand(1, $USERS_COUNT);
-      $winnerId = mt_rand(0, 1) ? $faker->numberBetween(2, $USERS_COUNT) : "NULL";
-      $winnerId = $winnerId === $userId ? $winnerId - 1 : $winnerId;
-
-      $cols = [
-        'slug' => $faker->slug(2),
-        'title' => addslashes($faker->sentence(mt_rand(3, 6))),
-        'image' => "lot-" . mt_rand(1, 6) . ".jpg",
-        'description' => addslashes($faker->paragraph()),
-        'price_start' => mt_rand(1000, 1000000),
-        'price_step' => mt_rand(100, 1000),
-        'expiration_date' => $faker->dateTimeBetween('-10 days', '+10 days')->format('Y-m-d H:i:s'),
-        'category_id' => mt_rand(1, 6),
-        'user_id' => $userId,
-        'winner_id' => $winnerId,
-      ];
-
-      // Bets seed
-      $price = $cols['price_start'];
-
-      if ($lotId % 3) {
-        foreach (range(1, $BETS_COUNT) as $key) {
-          $price = $cols['price_start'] + mt_rand(1, 10) * $cols['price_step'];
-          $betUserId = 0;
-
-          if ($key === $BETS_COUNT && is_int($winnerId)) {
-            $betUserId = $winnerId;
-          } else {
-            $betUserId = $faker->numberBetween(3, $USERS_COUNT);
-            $betUserId = $winnerId === $betUserId ? $betUserId - 1 : $betUserId;
-          }
-
-          $sqlValuesBets[] = "(" . implode(', ', [$price, $betUserId, $lotId])  . ")";
-        }
-      }
-
-      foreach ($cols as $key => $col) {
-        if (!is_int($col) && $col !== 'NULL') {
-          $cols[$key] = "'" . $col . "'";
-        }
-      }
-
-      $sqlValuesLots[] = "(" . implode(', ', $cols)  . ")";
-    }
-
-    // Lots Values to String
-    $sqlValuesLots = implode(', ', $sqlValuesLots);
-
-    mysqli_query(
-      $con,
-      "INSERT INTO " .
-        "lots ( " .
-        "slug, " .
-        "title, " .
-        "image, " .
-        "description, " .
-        "price_start, " .
-        "price_step, " .
-        "expiration_date, " .
-        "category_id, " .
-        "user_id, " .
-        "winner_id " .
-        ") " .
-        "VALUES " .
-        "$sqlValuesLots"
-    );
-
-    $logs['lots']['success'] = true;
-
-    // Bets
-    try {
-      // Bets Values to String
-      $sqlValuesBets = implode(', ', $sqlValuesBets);
-
-      mysqli_query(
-        $con,
-        "INSERT INTO " .
-          "bets (price, user_id, lot_id) " .
-          "VALUES " .
-          "$sqlValuesBets"
-      );
-
-      $logs['bets']['success'] = true;
-    } catch (\Throwable $th) {
-      $logs['bets']['error'] = mysqli_error($con);
-    }
-  } catch (\Throwable $th) {
-    $logs['lots']['error'] = mysqli_error($con);
-  }
-} catch (\Throwable $th) {
-  $logs['users']['error'] = mysqli_error($con);
 }
 
+// Lot ID (iterator)
+$lotId = 0;
 
+// Bet ID (iterator)
+$betId = 0;
+
+foreach (range(1, $USERS_COUNT) as $userId) {
+  // Lots
+  $lotsCount = mt_rand(1, 11);
+
+  foreach (range(1, $lotsCount) as $lotKey) {
+    // Lot ID
+    $lotId++;
+
+    $dataLot = [
+      'slug' => $faker->slug(2),
+      'title' => addslashes($faker->sentence(mt_rand(3, 6))),
+      'image' => "lot-" . mt_rand(1, 6) . ".jpg",
+      'description' => addslashes($faker->paragraph()),
+      'price_start' => mt_rand(1000, 1000000),
+      'price_step' => mt_rand(100, 1000),
+      'expiration_date' => $faker->dateTimeBetween('-10 days', '+10 days')->format('Y-m-d H:i:s'),
+      'category_id' => mt_rand(1, 6)
+    ];
+
+    ['error' => $error] = $lotCon->create($con, $dataLot, $userId, false);
+
+    if (isset($error)) {
+      $logs['lots']['error'][$lotId] = $error;
+    }
+
+    // Bets
+    $betsCount = mt_rand(0, 10);
+
+    if ($betsCount > 0) {
+      $price = $dataLot['price_start'];
+
+      foreach (range(1, $betsCount) as $betKey) {
+        // Bet ID
+        $betId++;
+
+        // Increase price
+        $price += mt_rand(1, 10) * $dataLot['price_step'];
+
+        // Random User
+        $betUserId = mt_rand(2, $USERS_COUNT);
+        $betUserId = $userId === $betUserId ? $betUserId - 1 : $betUserId;
+
+        ['error' => $error] = $betCon->create($con, $lotId, $price, $betUserId, false);
+
+        if (isset($error)) {
+          $logs['bets']['error'][$betId] = $error;
+        } else if ($betKey === $betsCount && date_create($dataLot['expiration_date']) <= date_create()) {
+          // Set winner for Lot
+          ['error' => $error] = $lotCon->setWin($con, $lotId, $betId, false);
+
+          if (isset($error)) {
+            $logs['bets']['error'][$betId] = $error;
+          }
+        }
+      }
+    }
+  }
+}
 
 echo '<h2>Seed</h2>';
 foreach ($logs as $key => $log) {
   if (is_array($log) && isset($log['error'])) {
-    echo '<p style="color: orange;">Database Table «' . $key . '» was not seeded due to an error: ' . $log['error'] . '</p>';
+    echo '<h3 style="color: orangered;">Database Table «' . $key . '» was not seeded due to an error: </h3>';
+
+    foreach ($log['error'] as $key => $error) {
+      echo '<p style="color: orange;">' . $error['message'] ?? '?' . '</p>';
+    }
   } else {
-    echo '<p style="color: lightgreen;">Database Table «' . $key . '» was successfully seeded!</p>';
+    echo '<p style="color: mediumseagreen;">Database Table «' . $key . '» was successfully seeded!</p>';
   }
 }
