@@ -58,7 +58,7 @@ INSERT INTO
     price_step,
     expiration_date,
     user_id,
-    winner_id,
+    winner_bet_id,
     category_id
   )
 VALUES
@@ -144,7 +144,7 @@ FROM
   ) ON l.category_id = c.id
 WHERE
   (
-    winner_id IS NULL
+    winner_bet_id IS NULL
     AND l.expiration_date > CURRENT_TIMESTAMP
   )
 GROUP BY
@@ -164,7 +164,7 @@ SELECT
   expiration_date,
   l.created_at,
   description,
-  winner_id,
+  winner_bet_id,
   l.user_id,
   category_id,
   c.title category_name

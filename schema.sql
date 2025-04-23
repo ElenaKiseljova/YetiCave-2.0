@@ -33,10 +33,8 @@ CREATE TABLE lots (
   expiration_date TIMESTAMP DEFAULT NULL,
   category_id INT DEFAULT NULL,
   user_id INT NOT NULL,
-  winner_id INT DEFAULT NULL,
   FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-  FOREIGN KEY (winner_id) REFERENCES users (id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -51,3 +49,7 @@ CREATE TABLE bets (
 );
 
 CREATE FULLTEXT INDEX lot_ft_search ON lots (title, description);
+
+ALTER TABLE lots
+ADD COLUMN winner_bet_id INT DEFAULT NULL AFTER user_id,
+ADD CONSTRAINT winner_bet_id FOREIGN KEY (winner_bet_id) REFERENCES bets (id) ON DELETE SET NULL;
