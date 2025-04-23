@@ -6,6 +6,6 @@ define('TIMEZONE', 'Europe/Kyiv');
 date_default_timezone_set(TIMEZONE);
 
 // Connect to the database
-$db = new DBController();
+$dbCon = new DBController();
 
-$con = $db->connect();
+$con = $dbCon->connect();
