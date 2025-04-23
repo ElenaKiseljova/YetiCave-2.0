@@ -7,6 +7,9 @@ session_start();
 // Auth User Flag
 $isAuth = false;
 
+// User ID
+$userId = null;
+
 // User Name
 $userName = null;
 
