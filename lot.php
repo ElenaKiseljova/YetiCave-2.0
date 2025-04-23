@@ -39,11 +39,14 @@ $lotTitle = isset($lotData['title']) ? htmlspecialchars($lotData['title']) : 'Л
 $priceCurrent = isset($lotData['price_current']) ? $lotData['price_current'] : $lotData['price_start'];
 // Price Step
 $priceStep = $lotData['price_step'] ?? 0;
+// Has expired earlier
+$expired = ($expirationDate = date_create($lotData['expiration_date'])) <= date_create();
 
 $pageContentData = [
   'title' => $lotTitle,
   'priceCurrent' => $priceCurrent,
   'priceStep' => $priceStep,
+  'expired' => $expired,
   'lot' => $lotData,
   'bets' => $bets ?? [],
   'nav' => $nav,
@@ -58,12 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if (!$isAuth) {
     $errors['price'] = 'Необходимо авторизоваться';
-  } else if ($userId === $lotId) {
+  } else if ($userId === $lotData['user_id']) {
     $errors['price'] = 'Нельзя сделать ставку на свой лот';
   } else if ($intPriceError = validateInt($price)) {
     $errors['price'] = $intPriceError;
   } else if (($price = intval($price)) < ($minBet = intval($priceCurrent) + intval($priceStep))) {
     $errors['price'] = 'Ставка не может быть меньше ' . $minBet;
+  } else if ($expired) {
+    $errors['price'] = 'Торги закрыты ' . date_format($expirationDate, 'd.m.y в H:m');
+  } else if (isset($lotData['winner_bet_id'])) {
+    $errors['price'] = 'Торги закрыты. Определен победитель.';
   }
 
   $errors = array_filter($errors);
