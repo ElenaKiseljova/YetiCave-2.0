@@ -1,5 +1,5 @@
 <?php
-require_once 'controllers/DBController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 
 class LotController
 {
@@ -38,7 +38,7 @@ class LotController
         " ) ON l.category_id = c.id " .
         "WHERE " .
         "( " .
-        "winner_id IS NULL " .
+        "winner_bet_id IS NULL " .
         "AND l.expiration_date > NOW() " .
         ") " .
         "GROUP BY " .
@@ -261,7 +261,7 @@ class LotController
         "expiration_date, " .
         "l.created_at, " .
         "description, " .
-        "winner_id, " .
+        "winner_bet_id, " .
         "l.user_id, " .
         "category_id, " .
         "c.title category_name " .
@@ -357,9 +357,10 @@ class LotController
    * @param \mysqli $con
    * @param array $data
    * @param int $userId
+   * @param bool $redirectAfter
    * @return array
    */
-  public function create($con, $data, $userId)
+  public function create($con, $data, $userId, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -369,18 +370,22 @@ class LotController
 
     try {
       // Create SQL query string
-      $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_id, category_id )' .
+      $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_bet_id, category_id )' .
         'VALUES (?, ?, ?, ?, ?, ?, ?, ' . $userId . ', NULL, ?)';
 
       $stmt = DBController::getPrepareSTMT($con, $sqlLot, $data);
 
       mysqli_stmt_execute($stmt);
 
-      // Get lot id
-      $lotId = mysqli_insert_id($con);
+      if ($redirectAfter) {
+        // Get lot id
+        $lotId = mysqli_insert_id($con);
 
-      // Redirect to the lot page
-      header('Location: /lot?id=' . $lotId);
+        // Redirect to the lot page
+        header('Location: /lot?id=' . $lotId);
+      } else {
+        $response['success'] = true;
+      }
     } catch (\Throwable $th) {
       $errorCode = $th->getCode();
       $errorMessage = $th->getMessage();
@@ -388,6 +393,55 @@ class LotController
       // Request error
       if ($errorCode = mysqli_errno($con)) {
         $errorMessage = 'Creating Lot failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param int $lotId
+   * @param int $betId
+   * @param bool $redirectAfter
+   * @return array
+   */
+  public function setWin($con, $lotId, $betId, $redirectAfter = true)
+  {
+    $betId = intval($betId);
+    $lotId = intval($lotId);
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlLot = 'UPDATE lots SET winner_bet_id = ? WHERE id = ?';
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlLot, [$betId, $lotId]);
+
+      mysqli_stmt_execute($stmt);
+
+      if ($redirectAfter) {
+        header('Location: /lots');
+      } else {
+        $response['success'] = true;
+      }
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Updating Lot «' . $lotId . '» failed due to an error: ' . mysqli_error($con);
       }
 
       $response['error'] = [

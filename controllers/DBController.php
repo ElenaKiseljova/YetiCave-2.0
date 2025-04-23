@@ -230,4 +230,39 @@ class DBController
 
     return $response;
   }
+
+  /**
+   *
+   * @param \mysqli $con
+   * @param string $sqlString
+   * @return array
+   */
+  function updateTable($con, $sqlString)
+  {
+    $response = [
+      'success' => null,
+      'error' => null
+    ];
+
+    try {
+      $result = mysqli_query($con, $sqlString);
+
+      $response['success'] = !!$result;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Cannot update table: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
 }

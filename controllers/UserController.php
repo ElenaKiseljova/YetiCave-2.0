@@ -1,4 +1,6 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
+
 class UserController
 {
   /**
@@ -94,9 +96,10 @@ class UserController
   /**
    * @param \mysqli $con
    * @param array $data
+   * @param bool $redirectAfter
    * @return array
    */
-  public function create($con, $data)
+  public function create($con, $data, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -116,8 +119,12 @@ class UserController
 
       mysqli_stmt_execute($stmt);
 
-      // Redirect to the login page
-      header('Location: /login');
+      if ($redirectAfter) {
+        // Redirect to the login page
+        header('Location: /login');
+      } else {
+        $response['success'] = true;
+      }
     } catch (\Throwable $th) {
       $errorCode = $th->getCode();
       $errorMessage = $th->getMessage();

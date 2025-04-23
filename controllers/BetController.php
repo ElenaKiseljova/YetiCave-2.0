@@ -1,4 +1,5 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 class BetController
 {
   /**
@@ -8,8 +9,6 @@ class BetController
    */
   public function getList($con, $lotId = null)
   {
-
-
     $response = [
       'data' => null,
       'success' => null,
@@ -60,12 +59,70 @@ class BetController
 
   /**
    * @param \mysqli $con
-   * @param int $lotId
-   * @param int $price
    * @param int $userId
    * @return array
    */
-  public function create($con, $lotId, $price, $userId)
+  public function getHistory($con, $userId)
+  {
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Bets SQL query string
+      $sqlBets =
+        "SELECT " .
+        "b.id, lot_id, price, b.created_at, u.id user_id, u.contacts user_contacts, l.image lot_image, l.title lot_title, l.expiration_date lot_expiration_date, l.winner_bet_id lot_winner_bet_id, c.title category_title " .
+        "FROM bets b " .
+        "JOIN users u ON b.user_id = u.id " .
+        "JOIN lots l ON b.lot_id = l.id " .
+        "JOIN categories c ON l.category_id = c.id " .
+        "WHERE b.user_id = ? " .
+        "ORDER BY b.created_at DESC";
+
+      $userId = intval($userId);
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlBets, [$userId]);
+
+      mysqli_stmt_execute($stmt);
+
+      // Create query for geting list of Bets
+      $result = mysqli_stmt_get_result($stmt);
+
+      // Request success
+      $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+      $response['data'] = $rows;
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Getting list of Bets failed due to an error: ' . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param int $lotId
+   * @param int $price
+   * @param int $userId
+   * @param bool $redirectAfter
+   * @return array
+   */
+  public function create($con, $lotId, $price, $userId, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -81,7 +138,11 @@ class BetController
 
       mysqli_stmt_execute($stmt);
 
-      header('Location: /my-bets');
+      if ($redirectAfter) {
+        header('Location: /my-bets');
+      } else {
+        $response['success'] = true;
+      }
     } catch (\Throwable $th) {
       $errorCode = $th->getCode();
       $errorMessage = $th->getMessage();

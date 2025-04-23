@@ -1,4 +1,6 @@
 <?php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
+
 class CategoryController
 {
   /**
@@ -120,6 +122,46 @@ class CategoryController
       // Request error
       if ($errorCode = mysqli_errno($con)) {
         $errorMessage = "Getting Category #$id failed due to an error: " . mysqli_error($con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
+
+  /**
+   * @param \mysqli $con
+   * @param array $data
+   * @return array
+   */
+  public function create($con, $data)
+  {
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlCategory = "INSERT INTO categories (slug, title) VALUES (?, ?)";
+
+      $stmt = DBController::getPrepareSTMT($con, $sqlCategory, $data);
+
+      mysqli_stmt_execute($stmt);
+
+      $response['success'] = true;
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($con)) {
+        $errorMessage = 'Creating Category failed due to an error: ' . mysqli_error($con);
       }
 
       $response['error'] = [
