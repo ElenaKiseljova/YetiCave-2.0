@@ -77,30 +77,35 @@ function diffForHumans($dateString): string
   $curDate = date_create();
   $createdAtDate  = date_create($dateString);
 
+  // Yesterday
+  $yesterdayDate = date_create('yesterday');
+
+  // Earlier
+  if (date_format($yesterdayDate, 'd') === date_format($createdAtDate, 'd')) {
+    return date_format($createdAtDate, 'Вчера, в H:i');
+  }
+
+  // Today
   $diff = date_diff($createdAtDate, $curDate);
 
   // Days
   if ($diff->d > 0) {
-    if ($diff->d === 1) {
-      return date_format($createdAtDate, 'Вчера, в H:i');
-    }
-
     return date_format($createdAtDate, 'd.m.Y в H:i');
   }
 
   // Hours
-  if ($h = $diff->h > 0) {
-    return ($h === 1 ? 'Час' : ($h . ' ' . getNounPluralForm($h, 'час', 'часа', 'часов') . ' назад'));
+  if (($h = $diff->h) > 0) {
+    return ($h === 1 ? 'Час' : ($h . ' ' . getNounPluralForm($h, 'час', 'часа', 'часов'))) . ' назад';
   }
 
   // Minutes
-  if ($m = $diff->i > 0) {
-    return ($m === 1 ? 'Минуту' : ($m . ' ' . getNounPluralForm($m, 'минуту', 'минут', 'минут') . ' назад'));
+  if (($m = $diff->i) > 0) {
+    return ($m === 1 ? 'Минуту' : ($m . ' ' . getNounPluralForm($m, 'минуту', 'минут', 'минут'))) . ' назад';
   }
 
   // Seconds
-  if ($s = $diff->s > 0) {
-    return ($s === 1 ? 'Секунду' : ($s . ' ' . getNounPluralForm($s, 'секунду', 'секунды', 'секунд') . ' назад'));
+  if (($s = $diff->s) > 0) {
+    return ($s === 1 ? 'Секунду' : ($s . ' ' . getNounPluralForm($s, 'секунду', 'секунды', 'секунд'))) . ' назад';
   }
 
   // Just now
@@ -209,9 +214,10 @@ function getTimeLeft($dateString): array
 /**
  * @param string $date
  * @param array $classes
+ * @param ?bool $isWin
  * @retrn string
  */
-function getTimerHTML($date, $classes = [])
+function getTimerHTML($date, $classes = [], $isWin = null)
 {
   // String of classes
   $classes = implode(' ', $classes);
@@ -220,9 +226,28 @@ function getTimerHTML($date, $classes = [])
   $hours = $time[0];
   $minutes = $time[1];
 
-  $timerClasses = $hours < 1 ? 'timer--finishing' : '';
+  // Time left
+  $isLastMinutes = !$hours && $minutes;
+  $isExpired = !$hours && !$minutes;
+
+  // Assitional CSS classes
+  $timerClasses = '';
+  // Text of Timer
   $timerText = str_pad($hours, 2, '0', STR_PAD_LEFT) . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT);
 
+  if ($isLastMinutes) {
+    $timerClasses = 'timer--finishing';
+  }
+
+  if ($isExpired) {
+    $timerClasses = 'timer--end';
+    $timerText = 'Торги окончены';
+  }
+
+  if ($isWin) {
+    $timerClasses = 'timer--win';
+    $timerText = 'Ставка выиграла';
+  }
 
   return "
         <div class='$classes timer $timerClasses'>
