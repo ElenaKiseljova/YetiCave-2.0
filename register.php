@@ -14,7 +14,7 @@ if ($isAuth) {
 $pageContentData = ['nav' => $nav];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $userCon = new UserController();
+  $userCon = new UserController($con);
 
   // Required fields
   $required = ['email', 'name', 'contacts', 'password'];
@@ -76,14 +76,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Try to get User by Email
-    ['data' => $userByEmail] = $userCon->getBy($con, 'email', $user['email']);
+    ['data' => $userByEmail] = $userCon->getBy('email', $user['email']);
 
     if ($userByEmail) {
       $errors['email'] = 'Email is already taken';
     }
 
     // Try to get User by Name
-    ['data' => $userByName] = $userCon->getBy($con, 'name', $user['name']);
+    ['data' => $userByName] = $userCon->getBy('name', $user['name']);
 
     if ($userByName) {
       $errors['name'] = 'Name is already taken';
@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
       // Create user
-      ['error' => $userCreateError] = $userCon->create($con, $user);
+      ['error' => $userCreateError] = $userCon->create($user);
 
       if (isset($userCreateError['message'])) {
         $errors['global'] = $userCreateError['message'];

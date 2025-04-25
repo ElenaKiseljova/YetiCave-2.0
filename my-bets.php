@@ -11,9 +11,9 @@ if (!$isAuth) {
   die();
 }
 
-$betCon = new BetController();
+$betCon = new BetController($con);
 
-['data' => $bets, 'error' => $betsError] = $betCon->getHistory($con, $userId);
+['data' => $bets, 'error' => $betsError] = $betCon->getHistory($userId);
 
 if (isset($betsError['message'])) {
   print($betsError['message']);

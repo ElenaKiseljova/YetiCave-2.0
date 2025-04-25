@@ -14,9 +14,9 @@ $userId = null;
 $userName = null;
 
 if (isset($_SESSION['user'])) {
-  $userCon = new UserController();
+  $userCon = new UserController($con);
 
-  ['data' => $user] = $userCon->getBy($con, 'id', $_SESSION['user']['id']);
+  ['data' => $user] = $userCon->getBy('id', $_SESSION['user']['id']);
 
   if (!$user) {
     header('Location: /logout');

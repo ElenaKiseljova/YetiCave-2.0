@@ -14,7 +14,7 @@ if ($isAuth) {
 $pageContentData = ['nav' => $nav];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $userCon = new UserController();
+  $userCon = new UserController($con);
 
   // Required fields
   $required = ['email', 'password'];
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Login user
-    ['error' => $userLoginError] = $userCon->login($con, $user);
+    ['error' => $userLoginError] = $userCon->login($user);
 
     if (isset($userLoginError['message'])) {
       $errors['global'] = $userLoginError['message'];

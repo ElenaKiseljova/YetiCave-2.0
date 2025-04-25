@@ -17,10 +17,10 @@ $pageContentData = [
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $lotCon = new LotController();
+  $lotCon = new LotController($con);
 
   // Getting slugs of Lots
-  ['data' => $lotsSlugs] = $lotCon->getAllCol($con, 'slug');
+  ['data' => $lotsSlugs] = $lotCon->getAllCol('slug');
 
   // Slugs of Lots
   if (is_array($lotsSlugs)) {
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Create lot
-    ['error' => $lotCreateError] = $lotCon->create($con, $lot, $userId);
+    ['error' => $lotCreateError] = $lotCon->create($lot, $userId);
 
     if (isset($lotCreateError['message'])) {
       $errors['global'] = $lotCreateError['message'];

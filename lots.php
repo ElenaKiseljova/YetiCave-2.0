@@ -7,9 +7,9 @@ require_once 'includes/archive.php';
 require_once 'controllers/CategoryController.php';
 
 if (isset($categoryId)) {
-  $catCon = new CategoryController();
+  $catCon = new CategoryController($con);
 
-  ['data' => $category, 'error' => $error] = $catCon->getById($con, $categoryId);
+  ['data' => $category, 'error' => $error] = $catCon->getById($categoryId);
 
   if (isset($error['message'])) {
     print($error['message']);

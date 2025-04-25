@@ -2,9 +2,9 @@
 require_once 'controllers/CategoryController.php';
 
 // Get list of Categories
-$category = new CategoryController();
+$category = new CategoryController($con);
 
-['data' => $categories, 'error' => $errorCategories] = $category->getList($con);
+['data' => $categories, 'error' => $errorCategories] = $category->getList();
 
 if (is_array($categories)) {
   $nav = includeTemplate('components/nav.php', ['categories' => $categories]);

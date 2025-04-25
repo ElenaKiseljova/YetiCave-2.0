@@ -31,10 +31,10 @@ $logs = [
   'bets' => []
 ];
 
-$categoryCon = new CategoryController();
-$userCon = new UserController();
-$lotCon = new LotController();
-$betCon = new BetController();
+$categoryCon = new CategoryController($con);
+$userCon = new UserController($con);
+$lotCon = new LotController($con);
+$betCon = new BetController($con);
 
 // Categories
 $categories = [
@@ -47,7 +47,7 @@ $categories = [
 ];
 
 foreach ($categories as $slug => $title) {
-  ['error' => $error] = $categoryCon->create($con, [$slug, $title]);
+  ['error' => $error] = $categoryCon->create([$slug, $title]);
 
   if (isset($error)) {
     $logs['categories']['error'][$slug] = $error;
@@ -63,7 +63,7 @@ foreach (range(1, $USERS_COUNT) as $userId) {
     'contacts' => addslashes($faker->address()),
   ];
 
-  ['error' => $error] = $userCon->create($con, $dataUser, false);
+  ['error' => $error] = $userCon->create($dataUser, false);
 
   if (isset($error)) {
     $logs['users']['error'][$userId] = $error;
@@ -95,7 +95,7 @@ foreach (range(1, $USERS_COUNT) as $userId) {
       'category_id' => mt_rand(1, 6)
     ];
 
-    ['error' => $error] = $lotCon->create($con, $dataLot, $userId, false);
+    ['error' => $error] = $lotCon->create($dataLot, $userId, false);
 
     if (isset($error)) {
       $logs['lots']['error'][$lotId] = $error;
@@ -118,13 +118,13 @@ foreach (range(1, $USERS_COUNT) as $userId) {
         $betUserId = mt_rand(2, $USERS_COUNT);
         $betUserId = $userId === $betUserId ? $betUserId - 1 : $betUserId;
 
-        ['error' => $error] = $betCon->create($con, $lotId, $price, $betUserId, false);
+        ['error' => $error] = $betCon->create($lotId, $price, $betUserId, false);
 
         if (isset($error)) {
           $logs['bets']['error'][$betId] = $error;
         } else if ($betKey === $betsCount && date_create($dataLot['expiration_date']) <= date_create()) {
           // Set winner for Lot
-          ['error' => $error] = $lotCon->setWin($con, $lotId, $betId, false);
+          ['error' => $error] = $lotCon->setWin($lotId, $betId, false);
 
           if (isset($error)) {
             $logs['bets']['error'][$betId] = $error;

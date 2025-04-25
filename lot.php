@@ -15,9 +15,9 @@ if (!$lotId) {
 }
 
 // Get list of Lots
-$lotCon = new LotController();
+$lotCon = new LotController($con);
 
-['data' => $lotData, 'error' => $error, 'success' => $success] = $lotCon->getItem($con, $lotId);
+['data' => $lotData, 'error' => $error, 'success' => $success] = $lotCon->getItem($lotId);
 
 if (!$lotData) {
   http_response_code(404);
@@ -25,9 +25,9 @@ if (!$lotData) {
   die();
 }
 
-$betCon = new BetController();
+$betCon = new BetController($con);
 
-['data' => $bets, 'error' => $betsError] = $betCon->getList($con, $lotData['id']);
+['data' => $bets, 'error' => $betsError] = $betCon->getList($lotData['id']);
 
 if (isset($betsError['message'])) {
   print($betsError['message']);
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $errors = array_filter($errors);
 
   if (empty($errors)) {
-    ['error' => $errorBet] = $betCon->create($con, $lotId, $price, $userId);
+    ['error' => $errorBet] = $betCon->create($lotId, $price, $userId);
 
     if (isset($errorBet['message'])) {
       $errors['price'] = $errorBet['message'];

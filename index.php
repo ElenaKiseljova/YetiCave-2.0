@@ -6,9 +6,9 @@ require_once 'utils/categories.php';
 require_once 'controllers/LotController.php';
 
 // Get list of Lots
-$lot = new LotController();
+$lot = new LotController($con);
 
-['data' => $lots, 'error' => $error] = $lot->getList($con);
+['data' => $lots, 'error' => $error] = $lot->getList();
 
 if ($error) {
   if (isset($error['message'])) {

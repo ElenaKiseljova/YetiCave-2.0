@@ -12,7 +12,7 @@ $data = [
 $params = filter_input_array(INPUT_GET, $data);
 
 // Get list of Lots
-$lot = new LotController();
+$lot = new LotController($con);
 
 // Search page
 $search = isset($params['search']) ? htmlspecialchars(trim($params['search'])) : null;
@@ -24,7 +24,7 @@ $categoryId = isset($params['category_id']) ? intval($params['category_id']) : n
 $query = [($search ?? $categoryId), isset($categoryId) ? 'category' : 'search'];
 
 // Get count of Lots
-['data' => $lotsCount, 'error' => $errorLotsCount] = $lot->count($con, ...$query);
+['data' => $lotsCount, 'error' => $errorLotsCount] = $lot->count(...$query);
 
 if ($errorLotsCount) {
   if (isset($errorLotsCount['message'])) {
@@ -39,7 +39,7 @@ $offset = ($curPage - 1) * $perPage;
 $pages = range(1, $pagesCount);
 
 // Get list og Lots
-['data' => $lots, 'error' => $error] = $lot->paginate($con, $perPage, $offset, ...$query);
+['data' => $lots, 'error' => $error] = $lot->paginate($perPage, $offset, ...$query);
 
 if ($error) {
   if (isset($error['message'])) {
