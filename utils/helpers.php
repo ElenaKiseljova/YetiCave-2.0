@@ -120,7 +120,7 @@ function diffForHumans($dateString): string
  */
 function includeTemplate($name, array $data = [])
 {
-  $name = 'templates/' . $name;
+  $name = $_SERVER['DOCUMENT_ROOT'] . '/templates/' . $name;
   $result = '';
 
   if (!is_readable($name)) {
