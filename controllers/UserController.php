@@ -164,7 +164,7 @@ class UserController
 
     try {
       // Get User by Email
-      ['data' => $user] = $this->getBy($this->con, 'email', $data['email']);
+      ['data' => $user] = $this->getBy('email', $data['email']);
 
       // Check Hash password
       if (!$user || !password_verify($data['password'], $user['password'])) {
