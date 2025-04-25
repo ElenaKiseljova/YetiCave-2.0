@@ -4,11 +4,20 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 class LotController
 {
   /**
-   * @param \mysqli $con
+   * @var \mysqli
+   */
+  private $con;
+
+  public function __construct(\mysqli $con)
+  {
+    $this->con = $con;
+  }
+
+  /**
    * @param int $limit
    * @return array
    */
-  public function getList($con, $limit = 6)
+  public function getList($limit = 6)
   {
     $limit = intval($limit);
 
@@ -47,7 +56,7 @@ class LotController
         "l.created_at DESC " .
         "LIMIT ?";
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlLots, [$limit]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlLots, [$limit]);
 
       mysqli_stmt_execute($stmt);
 
@@ -64,8 +73,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -78,12 +87,11 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param ?string|int $where
    * @param ?'search'|'category $whereType
    * @return array
    */
-  public function count($con, $where = null, $whereType = 'search')
+  public function count($where = null, $whereType = 'search')
   {
     $response = [
       'data' => null,
@@ -111,14 +119,14 @@ class LotController
         }
 
 
-        $stmt = DBController::getPrepareSTMT($con, $sqlLotsCount, $data);
+        $stmt = DBController::getPrepareSTMT($this->con, $sqlLotsCount, $data);
 
         mysqli_stmt_execute($stmt);
 
         // Create query for geting list of Lots
         $result = mysqli_stmt_get_result($stmt);
       } else {
-        $result = mysqli_query($con, $sqlLotsCount);
+        $result = mysqli_query($this->con, $sqlLotsCount);
       }
 
       // Request success
@@ -131,8 +139,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting count of Lots failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting count of Lots failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -145,14 +153,13 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $perPage
    * @param int $offset
    * @param ?string|int $where
    * @param ?'search'|'category' $whereType
    * @return array
    */
-  public function paginate($con, $perPage = 9, $offset = 0, $where = null, $whereType = 'search')
+  public function paginate($perPage = 9, $offset = 0, $where = null, $whereType = 'search')
   {
     $response = [
       'data' => null,
@@ -202,7 +209,7 @@ class LotController
         "l.created_at DESC " .
         "LIMIT ? OFFSET ?";
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlLots, [...$data, $perPage, $offset]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlLots, [...$data, $perPage, $offset]);
 
       mysqli_stmt_execute($stmt);
 
@@ -219,8 +226,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of Lots failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -233,11 +240,10 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $id
    * @return array
    */
-  public function getItem($con, $id)
+  public function getItem($id)
   {
     $id = intval($id);
 
@@ -276,7 +282,7 @@ class LotController
         "GROUP BY " .
         "l.id ";
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlLot, [$id]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlLot, [$id]);
 
       mysqli_stmt_execute($stmt);
 
@@ -297,8 +303,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = "Getting Lot #$id failed due to an error: " . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = "Getting Lot #$id failed due to an error: " . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -311,11 +317,10 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param string $colum id, slug, etc.
    * @return array
    */
-  public function getAllCol($con, $colum = 'id')
+  public function getAllCol($colum = 'id')
   {
     $colum = strip_tags(trim($colum));
 
@@ -329,7 +334,7 @@ class LotController
       // Create SQL query string
       $sqlColLots = "SELECT $colum FROM lots";
 
-      $result = mysqli_query($con, $sqlColLots);
+      $result = mysqli_query($this->con, $sqlColLots);
 
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
@@ -340,8 +345,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of «' . $colum . '» Lots failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of «' . $colum . '» Lots failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -354,13 +359,12 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param array $data
    * @param int $userId
    * @param bool $redirectAfter
    * @return array
    */
-  public function create($con, $data, $userId, $redirectAfter = true)
+  public function create($data, $userId, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -373,13 +377,13 @@ class LotController
       $sqlLot = 'INSERT INTO lots (slug, title, image, description, price_start, price_step, expiration_date, user_id, winner_bet_id, category_id )' .
         'VALUES (?, ?, ?, ?, ?, ?, ?, ' . $userId . ', NULL, ?)';
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlLot, $data);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlLot, $data);
 
       mysqli_stmt_execute($stmt);
 
       if ($redirectAfter) {
         // Get lot id
-        $lotId = mysqli_insert_id($con);
+        $lotId = mysqli_insert_id($this->con);
 
         // Redirect to the lot page
         header('Location: /lot?id=' . $lotId);
@@ -391,8 +395,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Creating Lot failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Creating Lot failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -405,13 +409,12 @@ class LotController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $lotId
    * @param int $betId
    * @param bool $redirectAfter
    * @return array
    */
-  public function setWin($con, $lotId, $betId, $redirectAfter = true)
+  public function setWin($lotId, $betId, $redirectAfter = true)
   {
     $betId = intval($betId);
     $lotId = intval($lotId);
@@ -426,7 +429,7 @@ class LotController
       // Create SQL query string
       $sqlLot = 'UPDATE lots SET winner_bet_id = ? WHERE id = ?';
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlLot, [$betId, $lotId]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlLot, [$betId, $lotId]);
 
       mysqli_stmt_execute($stmt);
 
@@ -440,8 +443,8 @@ class LotController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Updating Lot «' . $lotId . '» failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Updating Lot «' . $lotId . '» failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [

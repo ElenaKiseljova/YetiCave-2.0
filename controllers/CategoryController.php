@@ -4,10 +4,19 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 class CategoryController
 {
   /**
-   * @param \mysqli $con
+   * @var \mysqli
+   */
+  private $con;
+
+  public function __construct(\mysqli $con)
+  {
+    $this->con = $con;
+  }
+
+  /**
    * @return array
    */
-  public function getList($con)
+  public function getList()
   {
     $response = [
       'data' => null,
@@ -20,7 +29,7 @@ class CategoryController
       $sqlCategories = "SELECT * FROM categories";
 
       // Create query for geting list of Categories
-      $result = mysqli_query($con, $sqlCategories);
+      $result = mysqli_query($this->con, $sqlCategories);
 
       // Request success
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -32,8 +41,8 @@ class CategoryController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of Categories failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of Categories failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -46,11 +55,10 @@ class CategoryController
   }
 
   /**
-   * @param \mysqli $con
    * @param string $colum id, slug, etc.
    * @return array
    */
-  public function getAllCol($con, $colum = 'id')
+  public function getAllCol($colum = 'id')
   {
     $colum = strip_tags(trim($colum));
 
@@ -64,7 +72,7 @@ class CategoryController
       // Create SQL query string
       $sqlColLots = "SELECT $colum FROM categories";
 
-      $result = mysqli_query($con, $sqlColLots);
+      $result = mysqli_query($this->con, $sqlColLots);
 
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
@@ -75,8 +83,8 @@ class CategoryController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of «' . $colum . '» Categories failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of «' . $colum . '» Categories failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -89,11 +97,10 @@ class CategoryController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $id
    * @return array
    */
-  public function getById($con, $id)
+  public function getById($id)
   {
     $id = intval($id);
 
@@ -108,7 +115,7 @@ class CategoryController
       $sqlCategory = "SELECT * FROM categories WHERE id = $id";
 
       // Create query for geting Category
-      $result = mysqli_query($con, $sqlCategory);
+      $result = mysqli_query($this->con, $sqlCategory);
 
       // Request success
       $row = mysqli_fetch_assoc($result);
@@ -120,8 +127,8 @@ class CategoryController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = "Getting Category #$id failed due to an error: " . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = "Getting Category #$id failed due to an error: " . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -134,11 +141,10 @@ class CategoryController
   }
 
   /**
-   * @param \mysqli $con
    * @param array $data
    * @return array
    */
-  public function create($con, $data)
+  public function create($data)
   {
     $response = [
       'data' => null,
@@ -150,7 +156,7 @@ class CategoryController
       // Create SQL query string
       $sqlCategory = "INSERT INTO categories (slug, title) VALUES (?, ?)";
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlCategory, $data);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlCategory, $data);
 
       mysqli_stmt_execute($stmt);
 
@@ -160,8 +166,8 @@ class CategoryController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Creating Category failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Creating Category failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [

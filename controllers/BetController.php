@@ -3,11 +3,20 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 class BetController
 {
   /**
-   * @param \mysqli $con
+   * @var \mysqli
+   */
+  private $con;
+
+  public function __construct(?\mysqli $con)
+  {
+    $this->con = $con;
+  }
+
+  /**
    * @param ?int $lotId
    * @return array
    */
-  public function getList($con, $lotId = null)
+  public function getList($lotId = null)
   {
     $response = [
       'data' => null,
@@ -24,14 +33,14 @@ class BetController
 
         $sqlBets .= ' WHERE lot_id = ? ORDER BY price DESC';
 
-        $stmt = DBController::getPrepareSTMT($con, $sqlBets, [$lotId]);
+        $stmt = DBController::getPrepareSTMT($this->con, $sqlBets, [$lotId]);
 
         mysqli_stmt_execute($stmt);
 
         // Create query for geting list of Bets
         $result = mysqli_stmt_get_result($stmt);
       } else {
-        $result = mysqli_query($con, $sqlBets);
+        $result = mysqli_query($this->con, $sqlBets);
       }
 
       // Request success
@@ -44,8 +53,8 @@ class BetController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of Bets failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of Bets failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -58,11 +67,10 @@ class BetController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $userId
    * @return array
    */
-  public function getHistory($con, $userId)
+  public function getHistory($userId)
   {
     $response = [
       'data' => null,
@@ -84,7 +92,7 @@ class BetController
 
       $userId = intval($userId);
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlBets, [$userId]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlBets, [$userId]);
 
       mysqli_stmt_execute($stmt);
 
@@ -101,8 +109,8 @@ class BetController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of Bets failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of Bets failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -115,14 +123,13 @@ class BetController
   }
 
   /**
-   * @param \mysqli $con
    * @param int $lotId
    * @param int $price
    * @param int $userId
    * @param bool $redirectAfter
    * @return array
    */
-  public function create($con, $lotId, $price, $userId, $redirectAfter = true)
+  public function create($lotId, $price, $userId, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -134,7 +141,7 @@ class BetController
       // Bets SQL query string
       $sqlBets = 'INSERT INTO bets (user_id, lot_id, price) VALUES (?, ?, ?)';
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlBets, [intval($userId), intval($lotId), intval($price)]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlBets, [intval($userId), intval($lotId), intval($price)]);
 
       mysqli_stmt_execute($stmt);
 
@@ -148,8 +155,8 @@ class BetController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Creating Bet failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Creating Bet failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [

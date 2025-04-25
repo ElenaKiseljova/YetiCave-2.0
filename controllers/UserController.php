@@ -4,12 +4,21 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 class UserController
 {
   /**
-   * @param \mysqli $con
+   * @var \mysqli
+   */
+  private $con;
+
+  public function __construct(\mysqli $con)
+  {
+    $this->con = $con;
+  }
+
+  /**
    * @param string $col email, id, name etc.
    * @param string|int $value
    * @return array
    */
-  public function getBy($con, $col, $value)
+  public function getBy($col, $value)
   {
     $response = [
       'data' => null,
@@ -21,7 +30,7 @@ class UserController
       // Get User SQL query string
       $sqlUser = 'SELECT * FROM users WHERE ' . $col . ' = ?';
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlUser, [$value]);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlUser, [$value]);
 
       mysqli_stmt_execute($stmt);
 
@@ -37,8 +46,8 @@ class UserController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting User by «' . $col . '» failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting User by «' . $col . '» failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -51,11 +60,10 @@ class UserController
   }
 
   /**
-   * @param \mysqli $con
    * @param string $colum id, slug, etc.
    * @return array
    */
-  public function getAllCol($con, $colum = 'id')
+  public function getAllCol($colum = 'id')
   {
     $colum = strip_tags(trim($colum));
 
@@ -69,7 +77,7 @@ class UserController
       // Create SQL query string
       $sqlColUsers = "SELECT $colum FROM users";
 
-      $result = mysqli_query($con, $sqlColUsers);
+      $result = mysqli_query($this->con, $sqlColUsers);
 
       $rows = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
@@ -80,8 +88,8 @@ class UserController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Getting list of «' . $colum . '» Users failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Getting list of «' . $colum . '» Users failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -94,12 +102,11 @@ class UserController
   }
 
   /**
-   * @param \mysqli $con
    * @param array $data
    * @param bool $redirectAfter
    * @return array
    */
-  public function create($con, $data, $redirectAfter = true)
+  public function create($data, $redirectAfter = true)
   {
     $response = [
       'data' => null,
@@ -115,7 +122,7 @@ class UserController
       $sqlUser = 'INSERT INTO users (name, email, password, contacts)' .
         'VALUES (?, ?, ?, ?)';
 
-      $stmt = DBController::getPrepareSTMT($con, $sqlUser, $data);
+      $stmt = DBController::getPrepareSTMT($this->con, $sqlUser, $data);
 
       mysqli_stmt_execute($stmt);
 
@@ -130,8 +137,8 @@ class UserController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Creating User failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Creating User failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
@@ -144,11 +151,10 @@ class UserController
   }
 
   /**
-   * @param \mysqli $con
    * @param array $data
    * @return array
    */
-  public function login($con, $data)
+  public function login($data)
   {
     $response = [
       'data' => null,
@@ -158,7 +164,7 @@ class UserController
 
     try {
       // Get User by Email
-      ['data' => $user] = $this->getBy($con, 'email', $data['email']);
+      ['data' => $user] = $this->getBy($this->con, 'email', $data['email']);
 
       // Check Hash password
       if (!$user || !password_verify($data['password'], $user['password'])) {
@@ -177,8 +183,8 @@ class UserController
       $errorMessage = $th->getMessage();
 
       // Request error
-      if ($errorCode = mysqli_errno($con)) {
-        $errorMessage = 'Creating User failed due to an error: ' . mysqli_error($con);
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Creating User failed due to an error: ' . mysqli_error($this->con);
       }
 
       $response['error'] = [
