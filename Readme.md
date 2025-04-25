@@ -18,9 +18,27 @@ $dbParameters = [
 ];
 ```
 
-2. Запустить скрипт `init.php` для создания БД (`$dbParameters ['name']`) и таблиц `users`, `categories`, `lots`, `bets`
+2. Добавить файл `mail.php` в каталоге `/env` проекта с ассоциативным массивом `$mail` внутри, содержащим данные для подклчения к почтовому сервису:
 
-3. Запустить скрипт `seeds.php` для заполнения таблиц `users`, `categories`, `lots`, `bets` фейковыми данными
+```php
+$mail = [
+  'host' => 'host',
+  'protocol' => 2525,
+  'user' => 'user',
+  'password' => 'password',
+];
+```
+
+3. Запустить скрипт `init.php` для создания БД (`$dbParameters ['name']`) и таблиц `users`, `categories`, `lots`, `bets`
+
+4. Запустить скрипт `seeds.php` для заполнения таблиц `users`, `categories`, `lots`, `bets` фейковыми данными
+
+5. Тестовый юзер
+
+```
+Login: pamela.hansen@powlowski.com
+Password: password
+```
 
 ---
 
