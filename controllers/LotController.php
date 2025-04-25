@@ -455,4 +455,105 @@ class LotController
 
     return $response;
   }
+
+  /**
+   * @return void
+   */
+  public function updateWinners()
+  {
+    require $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/env/mail.php';
+
+    // Create transport for Swift Mailer
+    $transport = new Swift_SmtpTransport($mail['host'], $mail['protocol']);
+    $transport->setUsername($mail['user']);
+    $transport->setPassword($mail['password']);
+
+    // Create Swift Mailer
+    $mailer = new Swift_Mailer($transport);
+
+    $response = [
+      'data' => null,
+      'success' => null,
+      'error' => null,
+    ];
+
+    try {
+      // Create SQL query string
+      $sqlLotsWithoutWinner = "
+        SELECT b.id bet_id, b.lot_id lot_id, bb.max_price, u.name user_name, u.email user_email
+        FROM bets b
+        JOIN (SELECT lot_id, MAX(price) max_price FROM bets bb GROUP BY lot_id) bb ON b.lot_id = bb.lot_id AND b.price = bb.max_price
+        JOIN lots l ON b.lot_id = l.id
+        JOIN users u ON b.user_id = u.id
+        WHERE l.winner_bet_id IS NULL AND l.expiration_date <= NOW()
+      ";
+
+      $result = mysqli_query($this->con, $sqlLotsWithoutWinner);
+
+      $lotsWithoutWinner = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+      // Set winners & Send mail
+      $errors = [];
+      foreach ($lotsWithoutWinner as $key => $lot) {
+        // Start transaction
+        mysqli_query($this->con, 'START TRANSACTION');
+
+        // Set winners
+        ['error' => $errorSet] = $this->setWin($lot['lot_id'], $lot['bet_id'], false);
+
+        // Send mail
+        $message = new Swift_Message();
+        $message->setSubject('Ваша ставка победила');
+        $message->setFrom(['admin@yeticave.com']);
+        $message->setTo($lot['user_email'], $lot['user_name']);
+
+        // HTML content for message
+        $messageContent = includeTemplate('email/win.php', ['lotId' => $lot['lot_id']]);
+
+        $message->setBody($messageContent, 'text/html');
+
+        // Flag of success sending mail
+        $isMessageSent = $mailer->send($message);
+
+        if (!$errorSet && $isMessageSent) {
+          // Commit transaction
+          mysqli_query($this->con, 'COMMIT');
+        } else {
+          // Rollback transaction
+          mysqli_query($this->con, 'ROLLBACK');
+
+          if ($errorSet) {
+            $errors[$lot['lot_id']]['win_set'] = $errorSet['message'];
+          }
+
+          if (!$isMessageSent) {
+            $errors[$lot['lot_id']]['mail_send'] = 'Sending message to email failed';
+          }
+        }
+      }
+
+      if (empty($errors)) {
+        $response['success'] = true;
+      } else {
+        // throw an Error with JSON in message
+        throw new Exception(json_encode($errors), 400);
+      }
+    } catch (\Throwable $th) {
+      $errorCode = $th->getCode();
+      $errorMessage = $th->getMessage();
+
+      // Request error
+      if ($errorCode = mysqli_errno($this->con)) {
+        $errorMessage = 'Updating winners of Lots failed due to an error: ' . mysqli_error($this->con);
+      }
+
+      $response['error'] = [
+        'code' => $errorCode,
+        'message' => $errorMessage
+      ];
+    }
+
+    return $response;
+  }
 }
