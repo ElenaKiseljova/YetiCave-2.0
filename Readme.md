@@ -2,7 +2,7 @@
 
 - Студент: [Elena Kiseljova](https://github.com/ElenaKiseljova).
 - Наставник: `OnMyOwn`.
-- [Сайт с проектом](yeticave.tigle.zzz.com.ua)
+- [Сайт с проектом](http://yeticave.tigle.zzz.com.ua)
 
 ---
 
