@@ -7,17 +7,26 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 // Connect to the database with manualy select DB
 $dbCon = new DBController();
 
-$con = $dbCon->connect(true);
+if (!isset($dbParameters['prod'])) {
+  $con = $dbCon->connect(true);
 
-// Delete the old database before using it
-$dbCon->drop($con, $dbParameters['name']);
+  // Delete the old database before using it
+  $dbCon->drop($con, $dbParameters['name']);
 
-// Create DB
-$result = $dbCon->create($con, $dbParameters['name']);
+  // Create DB
+  $result = $dbCon->create($con, $dbParameters['name']);
 
-if ($result) {
-  // Select DB
-  $dbCon->select($con);
+  if ($result) {
+    // Select DB
+    $dbCon->select($con);
+  }
+} else {
+  $con = $dbCon->connect();
+
+  $dbCon->dropTable($con, 'bets');
+  $dbCon->dropTable($con, 'lots');
+  $dbCon->dropTable($con, 'users');
+  $dbCon->dropTable($con, 'categories');
 }
 
 // Create Tabels
