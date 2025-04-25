@@ -1,8 +1,8 @@
 <?php
 require_once 'utils/helpers.php';
-require_once 'utils/set.php';
-require_once 'utils/auth.php';
-require_once 'utils/categories.php';
+require_once 'includes/set.php';
+require_once 'includes/auth.php';
+require_once 'includes/categories.php';
 require_once 'controllers/BetController.php';
 
 if (!$isAuth) {
