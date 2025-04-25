@@ -1,5 +1,5 @@
 <?php
-require_once 'controllers/DBController.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/controllers/DBController.php';
 
 define('TIMEZONE', 'Europe/Kyiv');
 
